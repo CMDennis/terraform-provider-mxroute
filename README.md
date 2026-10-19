@@ -1,7 +1,9 @@
 # MXroute Terraform provider
 
-Phase 8 release preparation is implemented locally. The proposed first release is
-`0.1.0-beta.1`; it is **not published**. Six platform packages, signed-checksum
+Phase 8 release preparation is implemented locally. The usable beta release being
+prepared is `0.1.0-beta.2`; publication and Registry installation remain pending.
+The earlier `0.1.0-beta.1` was published without assets and locked as immutable;
+it cannot be installed and is retained unchanged. Six platform packages, signed-checksum
 tooling, protected manual draft releases, privacy hooks and ongoing maintenance
 checks are ready. Owner setup and actual Registry installation remain release
 gates. Start with the [manual publishing checklist](docs/design/publishing.md).
@@ -122,7 +124,7 @@ requires concrete approval under the plan, including any disposable-object clean
 Provider type: `mxroute`. Go module: `github.com/CMDennis/terraform-provider-mxroute`.
 Development uses local overrides or filesystem mirrors. The repository is now
 public with the required name. The intended release channel is the public
-Terraform Registry; no provider version has been published yet.
+Terraform Registry; a usable signed version has not yet been confirmed there.
 
 ## Secrets and account privacy
 

@@ -69,6 +69,13 @@ packaging/compilation, not native lifecycle coverage on every platform.
 
 ## Pending owner/publication gates
 
+The original signed `v0.1.0-beta.1` draft contains all nine validated assets, but a
+separate published entry for that tag has no assets and is immutable. Recovery
+uses `v0.1.0-beta.2` from the same green provider commit; no published version or
+tag is overwritten. The owner must approve signing and publish the complete
+workflow-created recovery draft before retrying Registry publication. The main
+branch installation/publishing guides now use the recovery version.
+
 Follow [the exact manual checklist](publishing.md): rename the repository while
 private, privately commit/push the reviewed implementation, configure required
 checks/tag protection/security reporting, create a protected release environment,

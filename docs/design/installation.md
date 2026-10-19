@@ -1,7 +1,9 @@
 # Installation, first use and upgrades
 
-The first beta is prepared but **not published**. Registry installation below
+The recovery beta `0.1.0-beta.2` is being prepared. Registry installation below
 becomes available only after the owner completes [publishing](publishing.md).
+The earlier `0.1.0-beta.1` public release is immutable and has no platform assets;
+it cannot be installed. Its tag and release are retained unchanged.
 The provider address is `registry.terraform.io/cmdennis/mxroute`, protocol v6.
 Supported packages are Linux, macOS and Windows on amd64 and arm64. The tested
 Terraform minimum is 1.11.1; 1.11.0 fails write-only password persistence checks.
@@ -19,7 +21,7 @@ terraform {
   required_providers {
     mxroute = {
       source  = "cmdennis/mxroute"
-      version = "0.1.0-beta.1"
+      version = "0.1.0-beta.2"
     }
   }
 }
@@ -74,7 +76,7 @@ SHA256SUMS and binary `.sig` into a private temporary directory. With `release_d
 `public_key_file` and `GPG_FINGERPRINT` set to those paths/trusted fingerprint:
 
 ```sh
-python3 scripts/verify_release.py --directory "$release_dir" --version 0.1.0-beta.1 \
+python3 scripts/verify_release.py --directory "$release_dir" --version 0.1.0-beta.2 \
   --public-key "$public_key_file" --fingerprint "$GPG_FINGERPRINT"
 ```
 
