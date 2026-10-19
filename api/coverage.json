@@ -1,0 +1,1203 @@
+{
+  "GET /verification-key": {
+    "client_method": "GetVerificationKey",
+    "terraform": [
+      "data source mxroute_verification_key"
+    ],
+    "phase": 3,
+    "tests": [
+      "TestClient_GetVerificationKey",
+      "TestOfflineDomainWorkflow"
+    ],
+    "documentation": [
+      "docs/data-sources/verification_key.md",
+      "docs/design/phase7.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+    "contract_issue_ids": [
+      "C06",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "GET /domains": {
+    "client_method": "ListDomains",
+    "terraform": [
+      "data source mxroute_domains",
+      "resource mxroute_domain.read"
+    ],
+    "phase": 3,
+    "tests": [
+      "TestClient_ListDomains",
+      "TestOfflineDomainWorkflow",
+      "TestOfflineDomainDriftAndDeletion",
+      "TestOfflineDomainReadFailuresPreserveState"
+    ],
+    "documentation": [
+      "docs/data-sources/domains.md",
+      "docs/resources/domain.md",
+      "docs/design/phase7.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+    "contract_issue_ids": [
+      "C03",
+      "C06",
+      "C10",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "POST /domains": {
+    "client_method": "CreateDomain",
+    "terraform": [
+      "resource mxroute_domain.create"
+    ],
+    "phase": 3,
+    "tests": [
+      "TestClient_CreateDomain",
+      "TestOfflineDomainWorkflow",
+      "TestOfflineDomainPartialCreateRecovery",
+      "TestOfflineFailedDNSPreventsCreation",
+      "TestOfflineDomainValidationErrorNotRetried",
+      "TestOfflineOnboardingDNSAndVisibilityWait"
+    ],
+    "documentation": [
+      "docs/resources/domain.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C03",
+      "C06",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "GET /domains/{domain}": {
+    "client_method": "GetDomain",
+    "terraform": [
+      "resource mxroute_domain.read",
+      "data source mxroute_domain"
+    ],
+    "phase": 3,
+    "tests": [
+      "TestClient_GetDomain",
+      "TestOfflineDomainWorkflow",
+      "TestOfflineDomainDriftAndDeletion",
+      "TestOfflineDomainReadFailuresPreserveState"
+    ],
+    "documentation": [
+      "docs/resources/domain.md",
+      "docs/data-sources/domain.md",
+      "docs/design/phase7.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+    "contract_issue_ids": [
+      "C03",
+      "C06",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "DELETE /domains/{domain}": {
+    "client_method": "DeleteDomain",
+    "terraform": [
+      "resource mxroute_domain.delete"
+    ],
+    "phase": 3,
+    "tests": [
+      "TestClient_DeleteDomain",
+      "TestOfflineDomainWorkflow"
+    ],
+    "documentation": [
+      "docs/resources/domain.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C03",
+      "C06",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": [
+      "C03"
+    ]
+  },
+  "PATCH /domains/{domain}/mail-status": {
+    "client_method": "SetMailHosting",
+    "terraform": [
+      "resource mxroute_domain.update"
+    ],
+    "phase": 3,
+    "tests": [
+      "TestClient_SetMailHosting",
+      "TestOfflineDomainWorkflow",
+      "TestOfflineDomainDriftAndDeletion",
+      "TestOfflineDomainReadFailuresPreserveState"
+    ],
+    "documentation": [
+      "docs/resources/domain.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C06",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "GET /domains/{domain}/pointers": {
+    "client_method": "ListDomainPointers",
+    "terraform": [
+      "resource mxroute_domain_pointer.read",
+      "data source mxroute_domain_pointers",
+      "data source mxroute_domain_pointer"
+    ],
+    "phase": 3,
+    "tests": [
+      "TestClient_ListDomainPointers",
+      "TestOfflineDomainWorkflow",
+      "TestOfflineDomainDriftAndDeletion",
+      "TestOfflineOnboardingDNSAndVisibilityWait"
+    ],
+    "documentation": [
+      "docs/resources/domain_pointer.md",
+      "docs/data-sources/domain_pointers.md",
+      "docs/data-sources/domain_pointer.md",
+      "docs/design/phase7.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+    "contract_issue_ids": [
+      "C03",
+      "C06",
+      "C10",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "POST /domains/{domain}/pointers": {
+    "client_method": "CreateDomainPointer",
+    "terraform": [
+      "resource mxroute_domain_pointer.create"
+    ],
+    "phase": 3,
+    "tests": [
+      "TestClient_CreateDomainPointer",
+      "TestOfflineDomainWorkflow",
+      "TestOfflineDomainDriftAndDeletion",
+      "TestOfflineOnboardingDNSAndVisibilityWait"
+    ],
+    "documentation": [
+      "docs/resources/domain_pointer.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C03",
+      "C06",
+      "C07",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": [
+      "C03"
+    ]
+  },
+  "DELETE /domains/{domain}/pointers/{pointer}": {
+    "client_method": "DeleteDomainPointer",
+    "terraform": [
+      "resource mxroute_domain_pointer.delete"
+    ],
+    "phase": 3,
+    "tests": [
+      "TestClient_DeleteDomainPointer",
+      "TestOfflineDomainWorkflow",
+      "TestOfflineDomainDriftAndDeletion",
+      "TestOfflineOnboardingDNSAndVisibilityWait"
+    ],
+    "documentation": [
+      "docs/resources/domain_pointer.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C03",
+      "C06",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "GET /domains/{domain}/email-accounts": {
+    "client_method": "ListEmailAccounts",
+    "terraform": [
+      "data source mxroute_email_accounts",
+      "resource mxroute_email_account.read"
+    ],
+    "phase": 4,
+    "tests": [
+      "TestClient_ListEmailAccounts",
+      "TestOfflineMailboxLifecycle",
+      "TestOfflineMailboxDefaultsAndDrift",
+      "TestOfflineMailReadFailuresPreserveState",
+      "TestOfflineMailboxImportAdoptionAndRotation",
+      "TestOfflineMailboxFailedUpdatePreservesState",
+      "TestOfflineMailboxConfirmedRotationReadbackFailure",
+      "TestOfflineMailboxExistingCaseVariantRejected",
+      "TestMailValidators",
+      "TestOfflineMailEmptyLists",
+      "TestOfflineMailWorkflowDependencies"
+    ],
+    "documentation": [
+      "docs/resources/email_account.md",
+      "docs/data-sources/email_account.md",
+      "docs/data-sources/email_accounts.md",
+      "docs/design/phase7.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; ordinary-account read and isolated test-mailbox import/refresh/no-change plan live-passed; remaining lifecycle behavior live-unverified",
+    "contract_issue_ids": [
+      "C03",
+      "C06",
+      "C09",
+      "C10",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "POST /domains/{domain}/email-accounts": {
+    "client_method": "CreateEmailAccount",
+    "terraform": [
+      "resource mxroute_email_account.create"
+    ],
+    "phase": 4,
+    "tests": [
+      "TestClient_CreateEmailAccount",
+      "TestOfflineMailboxLifecycle",
+      "TestOfflineMailboxDefaultsAndDrift",
+      "TestOfflineMailReadFailuresPreserveState",
+      "TestOfflineMailboxImportAdoptionAndRotation",
+      "TestOfflineMailboxFailedUpdatePreservesState",
+      "TestOfflineMailboxConfirmedRotationReadbackFailure",
+      "TestOfflineMailboxExistingCaseVariantRejected",
+      "TestMailValidators",
+      "TestOfflineMailWorkflowDependencies",
+      "TestMailboxTestGuardExactScopeAndSequence",
+      "TestMailboxProbePreservesExistingConfigurationAndRetainsOwnership"
+    ],
+    "documentation": [
+      "docs/resources/email_account.md",
+      "docs/data-sources/email_account.md",
+      "docs/data-sources/email_accounts.md",
+      "docs/design/mailbox-live-testing.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; isolated new-mailbox API operation live-passed (Phase 7); Terraform-driven writes and remaining lifecycle behavior live-unverified",
+    "contract_issue_ids": [
+      "C03",
+      "C06",
+      "C09",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": [
+      "C03"
+    ]
+  },
+  "GET /domains/{domain}/email-accounts/{user}": {
+    "client_method": "GetEmailAccount",
+    "terraform": [
+      "resource mxroute_email_account.read",
+      "data source mxroute_email_account"
+    ],
+    "phase": 4,
+    "tests": [
+      "TestClient_GetEmailAccount",
+      "TestOfflineMailboxLifecycle",
+      "TestOfflineMailboxDefaultsAndDrift",
+      "TestOfflineMailReadFailuresPreserveState",
+      "TestOfflineMailboxImportAdoptionAndRotation",
+      "TestOfflineMailboxFailedUpdatePreservesState",
+      "TestOfflineMailboxConfirmedRotationReadbackFailure",
+      "TestOfflineMailboxExistingCaseVariantRejected",
+      "TestMailValidators",
+      "TestOfflineMailWorkflowDependencies"
+    ],
+    "documentation": [
+      "docs/resources/email_account.md",
+      "docs/data-sources/email_account.md",
+      "docs/data-sources/email_accounts.md",
+      "docs/design/phase7.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; ordinary-account read and isolated test-mailbox import/refresh/no-change plan live-passed; remaining lifecycle behavior live-unverified",
+    "contract_issue_ids": [
+      "C03",
+      "C06",
+      "C09",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "PATCH /domains/{domain}/email-accounts/{user}": {
+    "client_method": "UpdateEmailAccount",
+    "terraform": [
+      "resource mxroute_email_account.update"
+    ],
+    "phase": 4,
+    "tests": [
+      "TestClient_UpdateEmailAccount",
+      "TestOfflineMailboxLifecycle",
+      "TestOfflineMailboxDefaultsAndDrift",
+      "TestOfflineMailReadFailuresPreserveState",
+      "TestOfflineMailboxImportAdoptionAndRotation",
+      "TestOfflineMailboxFailedUpdatePreservesState",
+      "TestOfflineMailboxConfirmedRotationReadbackFailure",
+      "TestOfflineMailboxExistingCaseVariantRejected",
+      "TestMailValidators",
+      "TestOfflineMailWorkflowDependencies",
+      "TestMailboxTestGuardExactScopeAndSequence",
+      "TestMailboxProbePreservesExistingConfigurationAndRetainsOwnership"
+    ],
+    "documentation": [
+      "docs/resources/email_account.md",
+      "docs/data-sources/email_account.md",
+      "docs/data-sources/email_accounts.md",
+      "docs/design/mailbox-live-testing.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; isolated new-mailbox API operation live-passed (Phase 7); Terraform-driven writes and remaining lifecycle behavior live-unverified",
+    "contract_issue_ids": [
+      "C03",
+      "C06",
+      "C08",
+      "C09",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": [
+      "C03"
+    ]
+  },
+  "DELETE /domains/{domain}/email-accounts/{user}": {
+    "client_method": "DeleteEmailAccount",
+    "terraform": [
+      "resource mxroute_email_account.delete"
+    ],
+    "phase": 4,
+    "tests": [
+      "TestClient_DeleteEmailAccount",
+      "TestOfflineMailboxLifecycle",
+      "TestOfflineMailboxDefaultsAndDrift",
+      "TestOfflineMailReadFailuresPreserveState",
+      "TestOfflineMailboxImportAdoptionAndRotation",
+      "TestOfflineMailboxFailedUpdatePreservesState",
+      "TestOfflineMailWorkflowDependencies"
+    ],
+    "documentation": [
+      "docs/resources/email_account.md",
+      "docs/data-sources/email_account.md",
+      "docs/data-sources/email_accounts.md",
+      "docs/design/mailbox-live-testing.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; explicit owned-test-mailbox deletion through Terraform live-passed with independent absence/baseline verification; broader destructive lifecycle behavior live-unverified",
+    "contract_issue_ids": [
+      "C03",
+      "C06",
+      "C09",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": [
+      "C03"
+    ]
+  },
+  "GET /domains/{domain}/forwarders": {
+    "client_method": "ListForwarders",
+    "terraform": [
+      "resource mxroute_forwarder.read",
+      "data source mxroute_forwarders",
+      "data source mxroute_forwarder"
+    ],
+    "phase": 4,
+    "tests": [
+      "TestClient_ListForwarders",
+      "TestOfflineRoutingLifecycle",
+      "TestOfflineForwarderReplacementFailure",
+      "TestOfflineForwarderFailedDeletePreservesRouting",
+      "TestOfflineRoutingDriftAndDeletion",
+      "TestOfflineMailEmptyLists",
+      "TestOfflineMailWorkflowDependencies"
+    ],
+    "documentation": [
+      "docs/resources/forwarder.md",
+      "docs/data-sources/forwarder.md",
+      "docs/data-sources/forwarders.md",
+      "docs/design/phase7.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+    "contract_issue_ids": [
+      "C02",
+      "C06",
+      "C10",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "POST /domains/{domain}/forwarders": {
+    "client_method": "CreateForwarder",
+    "terraform": [
+      "resource mxroute_forwarder.create"
+    ],
+    "phase": 4,
+    "tests": [
+      "TestClient_CreateForwarder",
+      "TestOfflineRoutingLifecycle",
+      "TestOfflineForwarderReplacementFailure",
+      "TestOfflineForwarderFailedDeletePreservesRouting",
+      "TestOfflineRoutingDriftAndDeletion",
+      "TestOfflineMailWorkflowDependencies"
+    ],
+    "documentation": [
+      "docs/resources/forwarder.md",
+      "docs/data-sources/forwarder.md",
+      "docs/data-sources/forwarders.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C02",
+      "C06",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "DELETE /domains/{domain}/forwarders/{alias}": {
+    "client_method": "DeleteForwarder",
+    "terraform": [
+      "resource mxroute_forwarder.delete"
+    ],
+    "phase": 4,
+    "tests": [
+      "TestClient_DeleteForwarder",
+      "TestOfflineRoutingLifecycle",
+      "TestOfflineForwarderReplacementFailure",
+      "TestOfflineForwarderFailedDeletePreservesRouting",
+      "TestOfflineRoutingDriftAndDeletion",
+      "TestOfflineMailWorkflowDependencies"
+    ],
+    "documentation": [
+      "docs/resources/forwarder.md",
+      "docs/data-sources/forwarder.md",
+      "docs/data-sources/forwarders.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C02",
+      "C06",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "GET /domains/{domain}/spam/settings": {
+    "client_method": "GetSpamSettings",
+    "terraform": [
+      "resource mxroute_spam_settings.read",
+      "data source mxroute_spam_settings"
+    ],
+    "phase": 5,
+    "tests": [
+      "TestClient_GetSpamSettings",
+      "TestOfflineSpamLifecycle",
+      "TestOfflineSpamDriftAndDeletion",
+      "TestOfflineSpamReadErrorsPreserveState"
+    ],
+    "documentation": [
+      "docs/resources/spam_settings.md",
+      "docs/data-sources/spam_settings.md",
+      "docs/design/phase7.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+    "contract_issue_ids": [
+      "C01",
+      "C05",
+      "C06",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "PATCH /domains/{domain}/spam/settings": {
+    "client_method": "UpdateSpamSettings",
+    "terraform": [
+      "resource mxroute_spam_settings.create",
+      "resource mxroute_spam_settings.update"
+    ],
+    "phase": 5,
+    "tests": [
+      "TestClient_UpdateSpamSettings",
+      "TestOfflineSpamLifecycle",
+      "TestOfflineSpamDriftAndDeletion",
+      "TestOfflineSpamReadErrorsPreserveState",
+      "TestSpamVerifiedSave",
+      "TestSpamConcurrentSharedEntries",
+      "TestSpamCanonicalDeleteAndNoBlindAdoption"
+    ],
+    "documentation": [
+      "docs/resources/spam_settings.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C01",
+      "C05",
+      "C06",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "GET /domains/{domain}/spam/whitelist": {
+    "client_method": "GetSpamWhitelist",
+    "terraform": [
+      "resource mxroute_spam_whitelist_entry.read",
+      "data source mxroute_spam_whitelist"
+    ],
+    "phase": 5,
+    "tests": [
+      "TestClient_GetSpamWhitelist",
+      "TestOfflineSpamLifecycle",
+      "TestOfflineSpamDriftAndDeletion",
+      "TestOfflineSpamReadErrorsPreserveState"
+    ],
+    "documentation": [
+      "docs/resources/spam_whitelist_entry.md",
+      "docs/data-sources/spam_whitelist.md",
+      "docs/design/phase7.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+    "contract_issue_ids": [
+      "C01",
+      "C06",
+      "C10",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "POST /domains/{domain}/spam/whitelist": {
+    "client_method": "AddSpamWhitelistEntry",
+    "terraform": [
+      "resource mxroute_spam_whitelist_entry.create"
+    ],
+    "phase": 5,
+    "tests": [
+      "TestClient_AddSpamWhitelistEntry",
+      "TestOfflineSpamLifecycle",
+      "TestOfflineSpamDriftAndDeletion",
+      "TestOfflineSpamReadErrorsPreserveState",
+      "TestSpamVerifiedSave",
+      "TestSpamConcurrentSharedEntries",
+      "TestSpamCanonicalDeleteAndNoBlindAdoption"
+    ],
+    "documentation": [
+      "docs/resources/spam_whitelist_entry.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C01",
+      "C06",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "DELETE /domains/{domain}/spam/whitelist/{entry}": {
+    "client_method": "DeleteSpamWhitelistEntry",
+    "terraform": [
+      "resource mxroute_spam_whitelist_entry.delete"
+    ],
+    "phase": 5,
+    "tests": [
+      "TestClient_DeleteSpamWhitelistEntry",
+      "TestOfflineSpamLifecycle",
+      "TestOfflineSpamDriftAndDeletion",
+      "TestOfflineSpamReadErrorsPreserveState",
+      "TestSpamVerifiedSave",
+      "TestSpamConcurrentSharedEntries",
+      "TestSpamCanonicalDeleteAndNoBlindAdoption"
+    ],
+    "documentation": [
+      "docs/resources/spam_whitelist_entry.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C01",
+      "C06",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "GET /domains/{domain}/spam/blacklist": {
+    "client_method": "GetSpamBlacklist",
+    "terraform": [
+      "resource mxroute_spam_blacklist_entry.read",
+      "data source mxroute_spam_blacklist"
+    ],
+    "phase": 5,
+    "tests": [
+      "TestClient_GetSpamBlacklist",
+      "TestOfflineSpamLifecycle",
+      "TestOfflineSpamDriftAndDeletion",
+      "TestOfflineSpamReadErrorsPreserveState"
+    ],
+    "documentation": [
+      "docs/resources/spam_blacklist_entry.md",
+      "docs/data-sources/spam_blacklist.md",
+      "docs/design/phase7.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+    "contract_issue_ids": [
+      "C01",
+      "C06",
+      "C10",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "POST /domains/{domain}/spam/blacklist": {
+    "client_method": "AddSpamBlacklistEntry",
+    "terraform": [
+      "resource mxroute_spam_blacklist_entry.create"
+    ],
+    "phase": 5,
+    "tests": [
+      "TestClient_AddSpamBlacklistEntry",
+      "TestOfflineSpamLifecycle",
+      "TestOfflineSpamDriftAndDeletion",
+      "TestOfflineSpamReadErrorsPreserveState",
+      "TestSpamVerifiedSave",
+      "TestSpamConcurrentSharedEntries",
+      "TestSpamCanonicalDeleteAndNoBlindAdoption"
+    ],
+    "documentation": [
+      "docs/resources/spam_blacklist_entry.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C01",
+      "C06",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "DELETE /domains/{domain}/spam/blacklist/{entry}": {
+    "client_method": "DeleteSpamBlacklistEntry",
+    "terraform": [
+      "resource mxroute_spam_blacklist_entry.delete"
+    ],
+    "phase": 5,
+    "tests": [
+      "TestClient_DeleteSpamBlacklistEntry",
+      "TestOfflineSpamLifecycle",
+      "TestOfflineSpamDriftAndDeletion",
+      "TestOfflineSpamReadErrorsPreserveState",
+      "TestSpamVerifiedSave",
+      "TestSpamConcurrentSharedEntries",
+      "TestSpamCanonicalDeleteAndNoBlindAdoption"
+    ],
+    "documentation": [
+      "docs/resources/spam_blacklist_entry.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C01",
+      "C06",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "GET /domains/{domain}/dns": {
+    "client_method": "GetDNSRecords",
+    "terraform": [
+      "data source mxroute_dns_records"
+    ],
+    "phase": 3,
+    "tests": [
+      "TestClient_GetDNSRecords",
+      "TestOfflineDomainWorkflow",
+      "TestOfflineDNSNullRefresh"
+    ],
+    "documentation": [
+      "docs/data-sources/dns_records.md",
+      "docs/design/phase7.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+    "contract_issue_ids": [
+      "C06",
+      "C11",
+      "C12",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "GET /domains/{domain}/catch-all": {
+    "client_method": "GetCatchAll",
+    "terraform": [
+      "resource mxroute_catch_all.read",
+      "data source mxroute_catch_all"
+    ],
+    "phase": 4,
+    "tests": [
+      "TestClient_GetCatchAll",
+      "TestOfflineRoutingLifecycle",
+      "TestOfflineRoutingDriftAndDeletion",
+      "TestOfflineRoutingReadFailuresPreserveState",
+      "TestOfflineMailEmptyLists",
+      "TestOfflineMailWorkflowDependencies"
+    ],
+    "documentation": [
+      "docs/resources/catch_all.md",
+      "docs/data-sources/catch_all.md",
+      "docs/design/phase7.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+    "contract_issue_ids": [
+      "C05",
+      "C06",
+      "C11",
+      "C12",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "PATCH /domains/{domain}/catch-all": {
+    "client_method": "SetCatchAll",
+    "terraform": [
+      "resource mxroute_catch_all.create",
+      "resource mxroute_catch_all.update"
+    ],
+    "phase": 4,
+    "tests": [
+      "TestClient_SetCatchAll",
+      "TestOfflineRoutingLifecycle",
+      "TestOfflineRoutingDriftAndDeletion",
+      "TestOfflineRoutingReadFailuresPreserveState",
+      "TestOfflineMailWorkflowDependencies"
+    ],
+    "documentation": [
+      "docs/resources/catch_all.md",
+      "docs/data-sources/catch_all.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C05",
+      "C06",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "GET /quota": {
+    "client_method": "GetQuota",
+    "terraform": [
+      "data source mxroute_quota"
+    ],
+    "phase": 5,
+    "tests": [
+      "TestClient_GetQuota",
+      "TestOfflineUsageReporting",
+      "TestOfflineUsageReadFailures",
+      "TestQuotaReadsAcceptRawAndWrappedButRejectIncompleteEnvelopes"
+    ],
+    "documentation": [
+      "docs/data-sources/quota.md",
+      "docs/design/phase7.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+    "contract_issue_ids": [
+      "C06",
+      "C11",
+      "C12",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "GET /quota/email": {
+    "client_method": "GetEmailUsage",
+    "terraform": [
+      "data source mxroute_email_usage"
+    ],
+    "phase": 5,
+    "tests": [
+      "TestClient_GetEmailUsage",
+      "TestOfflineUsageReporting",
+      "TestOfflineUsageReadFailures",
+      "TestQuotaReadsAcceptRawAndWrappedButRejectIncompleteEnvelopes"
+    ],
+    "documentation": [
+      "docs/data-sources/email_usage.md",
+      "docs/design/phase7.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+    "contract_issue_ids": [
+      "C06",
+      "C11",
+      "C12",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "GET /reseller/users": {
+    "client_method": "ListResellerUsers",
+    "terraform": [
+      "data source mxroute_reseller_users",
+      "resource mxroute_reseller_user.read/create/delete (complete-list presence)"
+    ],
+    "phase": 6,
+    "tests": [
+      "TestClient_ListResellerUsers",
+      "TestOfflineResellerLifecycle",
+      "TestOfflineResellerDriftAndReplacement",
+      "TestOfflineResellerReadFailuresPreserveState",
+      "TestOfflineResellerCreationRules",
+      "TestOfflineResellerImpersonationWorkflow",
+      "TestResellerExactLookup",
+      "TestResellerConversions"
+    ],
+    "documentation": [
+      "docs/data-sources/reseller_users.md",
+      "docs/resources/reseller_user.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C04",
+      "C06",
+      "C10",
+      "C11",
+      "C12",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "POST /reseller/users": {
+    "client_method": "CreateResellerUser",
+    "terraform": [
+      "resource mxroute_reseller_user.create"
+    ],
+    "phase": 6,
+    "tests": [
+      "TestClient_CreateResellerUser",
+      "TestOfflineResellerLifecycle",
+      "TestOfflineResellerCreationRules",
+      "TestOfflineResellerDriftAndReplacement",
+      "TestOfflineResellerImpersonationWorkflow"
+    ],
+    "documentation": [
+      "docs/resources/reseller_user.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C04",
+      "C06",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "GET /reseller/users/{username}": {
+    "client_method": "GetResellerUser",
+    "terraform": [
+      "resource mxroute_reseller_user.read",
+      "data source mxroute_reseller_user"
+    ],
+    "phase": 6,
+    "tests": [
+      "TestClient_GetResellerUser",
+      "TestOfflineResellerLifecycle",
+      "TestOfflineResellerQuotaOverrideSequencing",
+      "TestOfflineResellerPartialUpdateRecovery",
+      "TestOfflineResellerDriftAndReplacement",
+      "TestOfflineResellerReadFailuresPreserveState",
+      "TestOfflineResellerImpersonatedResourcesRejected",
+      "TestOfflineResellerImpersonationWorkflow"
+    ],
+    "documentation": [
+      "docs/resources/reseller_user.md",
+      "docs/data-sources/reseller_user.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C04",
+      "C06",
+      "C11",
+      "C12",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "PATCH /reseller/users/{username}": {
+    "client_method": "UpdateResellerUser",
+    "terraform": [
+      "resource mxroute_reseller_user.update(password_wo, quota_mb)"
+    ],
+    "phase": 6,
+    "tests": [
+      "TestClient_UpdateResellerUser",
+      "TestOfflineResellerLifecycle",
+      "TestOfflineResellerQuotaOverrideSequencing",
+      "TestOfflineResellerPartialUpdateRecovery",
+      "TestOfflineResellerDriftAndReplacement"
+    ],
+    "documentation": [
+      "docs/resources/reseller_user.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C04",
+      "C06",
+      "C08",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": [
+      "C04"
+    ]
+  },
+  "DELETE /reseller/users/{username}": {
+    "client_method": "DeleteResellerUser",
+    "terraform": [
+      "resource mxroute_reseller_user.delete"
+    ],
+    "phase": 6,
+    "tests": [
+      "TestClient_DeleteResellerUser",
+      "TestOfflineResellerLifecycle",
+      "TestOfflineResellerDriftAndReplacement",
+      "TestOfflineResellerImpersonationWorkflow"
+    ],
+    "documentation": [
+      "docs/resources/reseller_user.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C04",
+      "C06",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "POST /reseller/users/{username}/suspend": {
+    "client_method": "SuspendResellerUser",
+    "terraform": [
+      "resource mxroute_reseller_user.update(suspended=true)"
+    ],
+    "phase": 6,
+    "tests": [
+      "TestClient_SuspendResellerUser",
+      "TestOfflineResellerLifecycle"
+    ],
+    "documentation": [
+      "docs/resources/reseller_user.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C04",
+      "C06",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "POST /reseller/users/{username}/unsuspend": {
+    "client_method": "UnsuspendResellerUser",
+    "terraform": [
+      "resource mxroute_reseller_user.update(suspended=false)"
+    ],
+    "phase": 6,
+    "tests": [
+      "TestClient_UnsuspendResellerUser",
+      "TestOfflineResellerLifecycle",
+      "TestOfflineResellerDriftAndReplacement"
+    ],
+    "documentation": [
+      "docs/resources/reseller_user.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C04",
+      "C06",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "PATCH /reseller/users/{username}/package": {
+    "client_method": "SetResellerUserPackage",
+    "terraform": [
+      "resource mxroute_reseller_user.update(package)"
+    ],
+    "phase": 6,
+    "tests": [
+      "TestClient_SetResellerUserPackage",
+      "TestOfflineResellerLifecycle",
+      "TestOfflineResellerQuotaOverrideSequencing",
+      "TestOfflineResellerPartialUpdateRecovery",
+      "TestOfflineResellerDriftAndReplacement"
+    ],
+    "documentation": [
+      "docs/resources/reseller_user.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C04",
+      "C06",
+      "C08",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": [
+      "C04"
+    ]
+  },
+  "GET /reseller/packages": {
+    "client_method": "ListResellerPackages",
+    "terraform": [
+      "data source mxroute_reseller_packages",
+      "resource mxroute_reseller_package.read/create/delete (complete-list presence)"
+    ],
+    "phase": 6,
+    "tests": [
+      "TestClient_ListResellerPackages",
+      "TestOfflineResellerLifecycle",
+      "TestOfflineResellerCreationRules",
+      "TestOfflineResellerReadFailuresPreserveState",
+      "TestOfflineResellerImpersonationWorkflow",
+      "TestResellerExactLookup",
+      "TestResellerConversions"
+    ],
+    "documentation": [
+      "docs/data-sources/reseller_packages.md",
+      "docs/resources/reseller_package.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C04",
+      "C06",
+      "C10",
+      "C11",
+      "C12",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "POST /reseller/packages": {
+    "client_method": "CreateResellerPackage",
+    "terraform": [
+      "resource mxroute_reseller_package.create"
+    ],
+    "phase": 6,
+    "tests": [
+      "TestClient_CreateResellerPackage",
+      "TestOfflineResellerLifecycle",
+      "TestOfflineResellerCreationRules",
+      "TestOfflineResellerImpersonatedResourcesRejected"
+    ],
+    "documentation": [
+      "docs/resources/reseller_package.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C04",
+      "C06",
+      "C08",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "GET /reseller/packages/{name}": {
+    "client_method": "GetResellerPackage",
+    "terraform": [
+      "resource mxroute_reseller_package.read",
+      "data source mxroute_reseller_package"
+    ],
+    "phase": 6,
+    "tests": [
+      "TestClient_GetResellerPackage",
+      "TestOfflineResellerLifecycle",
+      "TestOfflineResellerDriftAndReplacement",
+      "TestOfflineResellerReadFailuresPreserveState",
+      "TestOfflineResellerImpersonatedResourcesRejected",
+      "TestResellerConversions"
+    ],
+    "documentation": [
+      "docs/resources/reseller_package.md",
+      "docs/data-sources/reseller_package.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C04",
+      "C06",
+      "C11",
+      "C12",
+      "C13"
+    ],
+    "feature_blockers": []
+  },
+  "PATCH /reseller/packages/{name}": {
+    "client_method": "UpdateResellerPackage",
+    "terraform": [
+      "resource mxroute_reseller_package.update"
+    ],
+    "phase": 6,
+    "tests": [
+      "TestClient_UpdateResellerPackage",
+      "TestOfflineResellerLifecycle",
+      "TestOfflineResellerDriftAndReplacement"
+    ],
+    "documentation": [
+      "docs/resources/reseller_package.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C04",
+      "C06",
+      "C08",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": [
+      "C04"
+    ]
+  },
+  "DELETE /reseller/packages/{name}": {
+    "client_method": "DeleteResellerPackage",
+    "terraform": [
+      "resource mxroute_reseller_package.delete"
+    ],
+    "phase": 6,
+    "tests": [
+      "TestClient_DeleteResellerPackage",
+      "TestOfflineResellerLifecycle",
+      "TestOfflineResellerPackageInUse"
+    ],
+    "documentation": [
+      "docs/resources/reseller_package.md"
+    ],
+    "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+    "contract_issue_ids": [
+      "C04",
+      "C06",
+      "C11",
+      "C13"
+    ],
+    "feature_blockers": []
+  }
+}

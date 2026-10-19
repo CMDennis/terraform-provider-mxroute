@@ -1,0 +1,39 @@
+name: Sanitized bug report
+description: Report a reproducible provider problem without account information.
+body:
+  - type: markdown
+    attributes:
+      value: Never include keys, passwords, real server/user/domain/mailbox identities, state, plans, logs, inventories or live responses. Use example.com and invented identities. Use SECURITY.md for private security reports.
+  - type: input
+    id: versions
+    attributes:
+      label: Provider, Terraform and operating-system versions
+    validations:
+      required: true
+  - type: dropdown
+    id: evidence
+    attributes:
+      label: Observation scope
+      options: [Offline mock, Live read, Approved isolated live mutation, Unknown]
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal sanitized configuration and steps
+      description: Do not repeat destructive operations to create a reproduction.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and observed behavior
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy review
+      options:
+        - label: I removed all credentials, account identities and private runtime artifacts.
+          required: true

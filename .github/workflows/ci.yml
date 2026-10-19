@@ -1,0 +1,58 @@
+name: Offline checks
+on:
+  push:
+  pull_request:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  provider:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ['ubuntu-latest', 'macos-latest']
+        go: ['1.26.9', '1.27.1']
+        terraform: ['1.11.1', '1.16.6']
+    env:
+      GOTOOLCHAIN: go${{ matrix.go }}
+      MXROUTE_SERVER: ''
+      MXROUTE_USERNAME: ''
+      MXROUTE_API_KEY: ''
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: ${{ matrix.go }}
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_version: ${{ matrix.terraform }}
+          terraform_wrapper: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m pip install -r requirements-dev.txt
+      - run: make check build
+  vulnerability:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: '1.26.9'
+      - run: make vuln
+  packaging:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: '1.26.9'
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_version: '1.11.1'
+          terraform_wrapper: false
+      - run: make snapshot
+      - run: make release-smoke
+        env:
+          MXROUTE_RELEASE_ARCHIVE: /tmp/mxroute-provider-dist/terraform-provider-mxroute_0.1.0-beta.1-dev_linux_amd64.zip
+          MXROUTE_REQUIRE_RELEASE_LIFECYCLE: 'true'

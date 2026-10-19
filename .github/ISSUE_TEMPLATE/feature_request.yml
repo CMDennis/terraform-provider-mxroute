@@ -1,0 +1,15 @@
+name: Feature request
+description: Suggest a workflow supported by documented MXroute operations.
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Desired workflow and current limitation
+      description: Use invented identities and reserved example domains; never attach account details.
+    validations:
+      required: true
+  - type: textarea
+    id: api
+    attributes:
+      label: Public API documentation supporting this request
+      description: Do not assume new endpoints or Terraform actions exist.

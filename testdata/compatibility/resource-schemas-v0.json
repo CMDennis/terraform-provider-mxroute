@@ -1,0 +1,898 @@
+{
+  "mxroute_catch_all": {
+    "Block": {
+      "Attributes": [
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "address",
+          "NestedType": null,
+          "Optional": true,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "description",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "domain",
+          "NestedType": null,
+          "Optional": false,
+          "Required": true,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "id",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "type",
+          "NestedType": null,
+          "Optional": false,
+          "Required": true,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        }
+      ],
+      "BlockTypes": null,
+      "Deprecated": false,
+      "DeprecationMessage": "",
+      "Version": 0
+    },
+    "Version": 0
+  },
+  "mxroute_domain": {
+    "Block": {
+      "Attributes": [
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "domain",
+          "NestedType": null,
+          "Optional": false,
+          "Required": true,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "id",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "mail_hosting",
+          "NestedType": null,
+          "Optional": true,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "bool",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "mail_hosting_pending",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "bool",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "pointers",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": [
+            "set",
+            "string"
+          ],
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "ssl_enabled",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "bool",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "verification_wait_seconds",
+          "NestedType": null,
+          "Optional": true,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "number",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "visibility_wait_seconds",
+          "NestedType": null,
+          "Optional": true,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "number",
+          "WriteOnly": false
+        }
+      ],
+      "BlockTypes": null,
+      "Deprecated": false,
+      "DeprecationMessage": "",
+      "Version": 0
+    },
+    "Version": 0
+  },
+  "mxroute_domain_pointer": {
+    "Block": {
+      "Attributes": [
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "domain",
+          "NestedType": null,
+          "Optional": false,
+          "Required": true,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "id",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "pointer",
+          "NestedType": null,
+          "Optional": false,
+          "Required": true,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "target",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "type",
+          "NestedType": null,
+          "Optional": true,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "verification_wait_seconds",
+          "NestedType": null,
+          "Optional": true,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "number",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "visibility_wait_seconds",
+          "NestedType": null,
+          "Optional": true,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "number",
+          "WriteOnly": false
+        }
+      ],
+      "BlockTypes": null,
+      "Deprecated": false,
+      "DeprecationMessage": "",
+      "Version": 0
+    },
+    "Version": 0
+  },
+  "mxroute_email_account": {
+    "Block": {
+      "Attributes": [
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "canonical_username",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "domain",
+          "NestedType": null,
+          "Optional": false,
+          "Required": true,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "email",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "id",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "limit",
+          "NestedType": null,
+          "Optional": true,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "number",
+          "WriteOnly": false
+        },
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "password_wo",
+          "NestedType": null,
+          "Optional": true,
+          "Required": false,
+          "Sensitive": true,
+          "Type": "string",
+          "WriteOnly": true
+        },
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "password_wo_version",
+          "NestedType": null,
+          "Optional": true,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "number",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "quota",
+          "NestedType": null,
+          "Optional": true,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "number",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "sent",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "number",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "suspended",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "bool",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "usage",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "number",
+          "WriteOnly": false
+        },
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "username",
+          "NestedType": null,
+          "Optional": false,
+          "Required": true,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        }
+      ],
+      "BlockTypes": null,
+      "Deprecated": false,
+      "DeprecationMessage": "",
+      "Version": 0
+    },
+    "Version": 0
+  },
+  "mxroute_forwarder": {
+    "Block": {
+      "Attributes": [
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "alias",
+          "NestedType": null,
+          "Optional": false,
+          "Required": true,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "canonical_alias",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "destinations",
+          "NestedType": null,
+          "Optional": false,
+          "Required": true,
+          "Sensitive": false,
+          "Type": [
+            "set",
+            "string"
+          ],
+          "WriteOnly": false
+        },
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "domain",
+          "NestedType": null,
+          "Optional": false,
+          "Required": true,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "email",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "id",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        }
+      ],
+      "BlockTypes": null,
+      "Deprecated": false,
+      "DeprecationMessage": "",
+      "Version": 0
+    },
+    "Version": 0
+  },
+  "mxroute_reseller_package": {
+    "Block": {
+      "Attributes": [
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "domain_pointers",
+          "NestedType": null,
+          "Optional": true,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "domains",
+          "NestedType": null,
+          "Optional": true,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "email_accounts",
+          "NestedType": null,
+          "Optional": true,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "email_forwarders",
+          "NestedType": null,
+          "Optional": true,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "id",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "name",
+          "NestedType": null,
+          "Optional": false,
+          "Required": true,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "quota_gb",
+          "NestedType": null,
+          "Optional": true,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        }
+      ],
+      "BlockTypes": null,
+      "Deprecated": false,
+      "DeprecationMessage": "",
+      "Version": 0
+    },
+    "Version": 0
+  },
+  "mxroute_reseller_user": {
+    "Block": {
+      "Attributes": [
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "current_email",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "domain",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "email",
+          "NestedType": null,
+          "Optional": false,
+          "Required": true,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "id",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "package",
+          "NestedType": null,
+          "Optional": false,
+          "Required": true,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "password_wo",
+          "NestedType": null,
+          "Optional": true,
+          "Required": false,
+          "Sensitive": true,
+          "Type": "string",
+          "WriteOnly": true
+        },
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "password_wo_version",
+          "NestedType": null,
+          "Optional": true,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "number",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "quota_mb",
+          "NestedType": null,
+          "Optional": true,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "quota_used_mb",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "number",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "suspended",
+          "NestedType": null,
+          "Optional": true,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "bool",
+          "WriteOnly": false
+        },
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "username",
+          "NestedType": null,
+          "Optional": false,
+          "Required": true,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        }
+      ],
+      "BlockTypes": null,
+      "Deprecated": false,
+      "DeprecationMessage": "",
+      "Version": 0
+    },
+    "Version": 0
+  },
+  "mxroute_spam_blacklist_entry": {
+    "Block": {
+      "Attributes": [
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "access_domain",
+          "NestedType": null,
+          "Optional": false,
+          "Required": true,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "entry",
+          "NestedType": null,
+          "Optional": false,
+          "Required": true,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "id",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        }
+      ],
+      "BlockTypes": null,
+      "Deprecated": false,
+      "DeprecationMessage": "",
+      "Version": 0
+    },
+    "Version": 0
+  },
+  "mxroute_spam_settings": {
+    "Block": {
+      "Attributes": [
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "access_domain",
+          "NestedType": null,
+          "Optional": false,
+          "Required": true,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "high_score",
+          "NestedType": null,
+          "Optional": false,
+          "Required": true,
+          "Sensitive": false,
+          "Type": "number",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "id",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        }
+      ],
+      "BlockTypes": null,
+      "Deprecated": false,
+      "DeprecationMessage": "",
+      "Version": 0
+    },
+    "Version": 0
+  },
+  "mxroute_spam_whitelist_entry": {
+    "Block": {
+      "Attributes": [
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "access_domain",
+          "NestedType": null,
+          "Optional": false,
+          "Required": true,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": false,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "entry",
+          "NestedType": null,
+          "Optional": false,
+          "Required": true,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        },
+        {
+          "Computed": true,
+          "Deprecated": false,
+          "DeprecationMessage": "",
+          "Name": "id",
+          "NestedType": null,
+          "Optional": false,
+          "Required": false,
+          "Sensitive": false,
+          "Type": "string",
+          "WriteOnly": false
+        }
+      ],
+      "BlockTypes": null,
+      "Deprecated": false,
+      "DeprecationMessage": "",
+      "Version": 0
+    },
+    "Version": 0
+  }
+}

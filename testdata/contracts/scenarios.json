@@ -1,0 +1,1000 @@
+{
+  "schema_version": 1,
+  "source": {
+    "openapi_snapshot": "api/snapshots/openapi-2026-10-19.yaml",
+    "api_version": "1.0.0",
+    "note": "Synthetic contract fixtures only. Live-discrepancy regressions reproduce response structure using invented values; no account data, raw live responses or credentials are retained. Hypothetical variants are defensive cases."
+  },
+  "cases": [
+    {
+      "id": "S001-verification-key-envelope",
+      "kind": "spec-shaped-success",
+      "method": "GET",
+      "path": "/verification-key",
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "key": "_da-verify-0123456789abcdef0123456789abcdef",
+            "record": {
+              "type": "TXT",
+              "name": "_da-verify-0123456789abcdef0123456789abcdef",
+              "value": "domain-verified"
+            },
+            "description": "Add this TXT record before adding the domain"
+          }
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Decode the documented success/data envelope and expose the verification record values.",
+      "contract_issue_ids": [
+        "C06",
+        "C11"
+      ],
+      "operation_key": "GET /verification-key"
+    },
+    {
+      "id": "S002-domain-list-complete-array",
+      "kind": "spec-shaped-success",
+      "method": "GET",
+      "path": "/domains",
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": [
+            "example.com",
+            "example.org"
+          ]
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Treat a valid array as the complete list because no paging contract is declared; empty data is a valid empty list.",
+      "contract_issue_ids": [
+        "C06",
+        "C10"
+      ],
+      "operation_key": "GET /domains"
+    },
+    {
+      "id": "S003-domain-create-documented-201-body",
+      "kind": "spec-shaped-success",
+      "method": "POST",
+      "path": "/domains",
+      "request": {
+        "json": {
+          "domain": "example.com"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "domain": "example.com",
+            "ssl_enabled": false
+          }
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Decode documented success/data body with domain and ssl_enabled. An empty body on this operation would violate the declared response schema; reconcile with GET rather than treating it as a fully observed create.",
+      "contract_issue_ids": [
+        "C03",
+        "C11"
+      ],
+      "operation_key": "POST /domains"
+    },
+    {
+      "id": "S004-domain-delete-204",
+      "kind": "spec-sparse-success",
+      "method": "DELETE",
+      "path": "/domains/example.com",
+      "response": {
+        "status": 204,
+        "headers": {},
+        "body": null,
+        "body_encoding": "empty"
+      },
+      "expectation": "Accept 204 without attempting JSON decode. A client must not infer cascade details from the response.",
+      "contract_issue_ids": [
+        "C03",
+        "C11"
+      ],
+      "operation_key": "DELETE /domains/{domain}"
+    },
+    {
+      "id": "S005-pointer-default-alias",
+      "kind": "spec-shaped-request",
+      "method": "POST",
+      "path": "/domains/example.com/pointers",
+      "request": {
+        "json": {
+          "pointer": "alias.example.net"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {},
+        "body": null,
+        "body_encoding": "empty"
+      },
+      "expectation": "When alias is omitted, preserve the documented default true; do not serialize false as an omission.",
+      "contract_issue_ids": [
+        "C03",
+        "C07",
+        "C11"
+      ],
+      "operation_key": "POST /domains/{domain}/pointers"
+    },
+    {
+      "id": "S006-mailbox-patch-omission-preserves",
+      "kind": "spec-shaped-request",
+      "method": "PATCH",
+      "path": "/domains/example.com/email-accounts/Team",
+      "request": {
+        "json": {},
+        "runtime_fields": {
+          "password": {
+            "generator": "random",
+            "length": 24
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {},
+        "body": null,
+        "body_encoding": "empty"
+      },
+      "expectation": "Omitted quota and limit are unchanged; a successful sparse 200 is not a read response. Resolve casing through canonical mailbox lookup.",
+      "contract_issue_ids": [
+        "C08",
+        "C09",
+        "C11"
+      ],
+      "operation_key": "PATCH /domains/{domain}/email-accounts/{user}"
+    },
+    {
+      "id": "S007-mailbox-list-case-insensitive-unique-match",
+      "kind": "synthetic-list-variant",
+      "method": "GET",
+      "path": "/domains/example.com/email-accounts",
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": [
+            {
+              "username": "Team",
+              "email": "Team@example.com",
+              "quota": 0,
+              "usage": 2.25,
+              "limit": 9600,
+              "sent": 12,
+              "suspended": false
+            }
+          ]
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "A desired local part team may match the single returned Team under case-folded comparison; retain Team as canonical server spelling. This fixture illustrates comparison behavior, not a separate API casing guarantee.",
+      "contract_issue_ids": [
+        "C09",
+        "C10"
+      ],
+      "operation_key": "GET /domains/{domain}/email-accounts"
+    },
+    {
+      "id": "S008-mailbox-list-case-fold-ambiguous",
+      "kind": "hypothetical-defensive-variant",
+      "method": "GET",
+      "path": "/domains/example.com/email-accounts",
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": [
+            {
+              "username": "Team",
+              "email": "Team@example.com",
+              "quota": 100,
+              "usage": 2,
+              "limit": 9600,
+              "sent": 1,
+              "suspended": false
+            },
+            {
+              "username": "team",
+              "email": "team@example.com",
+              "quota": 100,
+              "usage": 0,
+              "limit": 9600,
+              "sent": 0,
+              "suspended": false
+            }
+          ]
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Fail lookup as ambiguous and preserve Terraform state; never pick one matching mailbox arbitrarily.",
+      "contract_issue_ids": [
+        "C06",
+        "C09",
+        "C10"
+      ],
+      "operation_key": "GET /domains/{domain}/email-accounts"
+    },
+    {
+      "id": "S009-forwarder-create-sparse-201",
+      "kind": "spec-sparse-success",
+      "method": "POST",
+      "path": "/domains/example.com/forwarders",
+      "request": {
+        "json": {
+          "alias": "support",
+          "destinations": [
+            "help@example.net"
+          ]
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {},
+        "body": null,
+        "body_encoding": "empty"
+      },
+      "expectation": "Accept sparse 201 and use the forwarder list for readback; later destination changes use replacement because no update method is documented.",
+      "contract_issue_ids": [
+        "C02",
+        "C11"
+      ],
+      "operation_key": "POST /domains/{domain}/forwarders"
+    },
+    {
+      "id": "S010-catch-all-null-address",
+      "kind": "spec-shaped-success",
+      "method": "GET",
+      "path": "/domains/example.com/catch-all",
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "type": "fail",
+            "address": null,
+            "description": "Reject mail to unknown recipients"
+          }
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Retain null address distinctly from empty string or an absent field. Resource destroy relinquishes management and leaves the remote setting unchanged.",
+      "contract_issue_ids": [
+        "C05",
+        "C12"
+      ],
+      "operation_key": "GET /domains/{domain}/catch-all"
+    },
+    {
+      "id": "S011-shared-spam-list-domain-context-a",
+      "kind": "spec-shaped-success",
+      "method": "GET",
+      "path": "/domains/one.example/spam/whitelist",
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": [
+            "*@trusted.example",
+            "postmaster@vendor.example"
+          ]
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Represent entries as effective-account shared state; the path domain is access context, not a second independent owner.",
+      "contract_issue_ids": [
+        "C01",
+        "C10"
+      ],
+      "operation_key": "GET /domains/{domain}/spam/whitelist"
+    },
+    {
+      "id": "S012-shared-spam-list-domain-context-b",
+      "kind": "synthetic-shared-scope-variant",
+      "method": "GET",
+      "path": "/domains/two.example/spam/whitelist",
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": [
+            "*@trusted.example",
+            "postmaster@vendor.example"
+          ]
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Fixture illustrates equal account-shared results across contexts. The source supports shared list scope; equality of these concrete contents is synthetic test data.",
+      "contract_issue_ids": [
+        "C01",
+        "C10"
+      ],
+      "operation_key": "GET /domains/{domain}/spam/whitelist"
+    },
+    {
+      "id": "S013-spam-score-sparse-update",
+      "kind": "spec-sparse-success",
+      "method": "PATCH",
+      "path": "/domains/example.com/spam/settings",
+      "request": {
+        "json": {
+          "high_score": 20
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {},
+        "body": null,
+        "body_encoding": "empty"
+      },
+      "expectation": "Accept sparse 200. Read settings before retrying any uncertain update. The score scope remains unverified even though sender lists are explicitly shared.",
+      "contract_issue_ids": [
+        "C01",
+        "C05",
+        "C11"
+      ],
+      "operation_key": "PATCH /domains/{domain}/spam/settings"
+    },
+    {
+      "id": "S014-nullable-dns-records",
+      "kind": "spec-shaped-success",
+      "method": "GET",
+      "path": "/domains/example.com/dns",
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "mx_records": [
+              {
+                "priority": 10,
+                "hostname": "mx.example.com",
+                "description": "Primary MX"
+              }
+            ],
+            "spf": {
+              "type": "TXT",
+              "name": "@",
+              "value": "v=spf1 include:mxroute.com -all"
+            },
+            "dkim": null,
+            "verification": null
+          }
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Preserve null DKIM and verification records as explicit nullable values; do not synthesize empty records.",
+      "contract_issue_ids": [
+        "C12"
+      ],
+      "operation_key": "GET /domains/{domain}/dns"
+    },
+    {
+      "id": "S015-quota-raw-object-unlimited",
+      "kind": "spec-shaped-success",
+      "method": "GET",
+      "path": "/quota",
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "username": "ordinary_user",
+          "total_used": 1073741824,
+          "total_limit": 0,
+          "percent_used": 0,
+          "breakdown": {
+            "email": 805306368,
+            "web": 0,
+            "databases": 0,
+            "backups": 0,
+            "other": 268435456
+          },
+          "grace_period": null,
+          "updated_at": "2026-10-19T08:00:00-04:00"
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Decode the unwrapped top-level object. Preserve bytes and treat total_limit zero as unlimited; preserve null grace_period.",
+      "contract_issue_ids": [
+        "C11",
+        "C12"
+      ],
+      "operation_key": "GET /quota"
+    },
+    {
+      "id": "S016-email-usage-raw-object",
+      "kind": "spec-shaped-success",
+      "method": "GET",
+      "path": "/quota/email",
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "username": "ordinary_user",
+          "accounts": [
+            {
+              "email_address": "team@example.com",
+              "size_bytes": 2097152,
+              "updated_at": "2026-10-19T08:00:00-04:00"
+            }
+          ]
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Decode a raw object, not success/data; preserve byte units and hourly snapshot timestamp.",
+      "contract_issue_ids": [
+        "C10",
+        "C11"
+      ],
+      "operation_key": "GET /quota/email"
+    },
+    {
+      "id": "S017-reseller-package-default-omissions",
+      "kind": "spec-shaped-request",
+      "method": "POST",
+      "path": "/reseller/packages",
+      "request": {
+        "json": {
+          "name": "starter"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {},
+        "body": null,
+        "body_encoding": "empty"
+      },
+      "expectation": "Omitted fields have documented defaults: quota 1 GB, domains 1, customer email accounts 100, forwarders 100, pointers 10. Read back after sparse create; do not turn missing response fields into zero.",
+      "contract_issue_ids": [
+        "C04",
+        "C08",
+        "C11"
+      ],
+      "operation_key": "POST /reseller/packages"
+    },
+    {
+      "id": "S018-reseller-user-null-quota-and-package-readback",
+      "kind": "spec-shaped-success",
+      "method": "GET",
+      "path": "/reseller/users/ordinary_user",
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "username": "ordinary_user",
+            "email": "owner@example.net",
+            "domain": "example.net",
+            "package": "starter",
+            "suspended": false,
+            "quota": {
+              "limit": null,
+              "used": 512.5,
+              "unlimited": true
+            }
+          }
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Preserve null limit and the explicit unlimited flag. Do not infer a numeric override from package settings.",
+      "contract_issue_ids": [
+        "C04",
+        "C12"
+      ],
+      "operation_key": "GET /reseller/users/{username}"
+    },
+    {
+      "id": "S018b-package-null-unlimited-versus-zero-customer-mailboxes",
+      "kind": "spec-shaped-success",
+      "method": "GET",
+      "path": "/reseller/packages/starter",
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "name": "starter",
+            "settings": {
+              "quota_gb": null,
+              "quota_unlimited": true,
+              "domains": 1,
+              "email_accounts": 0,
+              "email_forwarders": 100,
+              "domain_pointers": 10
+            }
+          }
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Preserve nullable unlimited quota separately from email_accounts=0, which means no customer mailboxes; the system mailbox is excluded from that allowance.",
+      "contract_issue_ids": [
+        "C04",
+        "C08",
+        "C12"
+      ],
+      "operation_key": "GET /reseller/packages/{name}"
+    },
+    {
+      "id": "S019-unauthorized-standard-envelope",
+      "kind": "spec-shaped-error",
+      "method": "GET",
+      "path": "/domains",
+      "response": {
+        "status": 401,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "error": {
+            "code": "UNAUTHORIZED",
+            "message": "Invalid API credentials"
+          }
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Return an authentication diagnostic and preserve state; an error is never an empty successful inventory.",
+      "contract_issue_ids": [
+        "C06",
+        "C13"
+      ],
+      "operation_key": "GET /domains"
+    },
+    {
+      "id": "S020-forbidden-standard-envelope",
+      "kind": "hypothetical-standard-error-envelope",
+      "method": "GET",
+      "path": "/reseller/users",
+      "response": {
+        "status": 403,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "error": {
+            "code": "FORBIDDEN",
+            "message": "Requires reseller privileges"
+          }
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Fail with an authorization diagnostic and preserve state. The endpoint documents 403 but not a response schema; envelope body is illustrative from the global format.",
+      "contract_issue_ids": [
+        "C06",
+        "C13"
+      ],
+      "operation_key": "GET /reseller/users"
+    },
+    {
+      "id": "S021-hypothetical-domain-detail-404",
+      "kind": "hypothetical-defensive-variant",
+      "method": "GET",
+      "path": "/domains/missing.example",
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "error": {
+            "code": "NOT_FOUND",
+            "message": "Resource not found"
+          }
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "The GET response list does not document 404, so preserve state and report the unexpected response. Confirm absence using a successful complete GET /domains list or another verified route before removing state.",
+      "contract_issue_ids": [
+        "C06"
+      ],
+      "operation_key": "GET /domains/{domain}"
+    },
+    {
+      "id": "S022-not-found-spam-access-context",
+      "kind": "spec-shaped-error-contextual",
+      "method": "GET",
+      "path": "/domains/missing.example/spam/whitelist",
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "error": {
+            "code": "NOT_FOUND",
+            "message": "Resource not found"
+          }
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Fail the operation and preserve shared entry state: 404 may indicate the required domain access context is missing, not that an account-shared entry was deleted.",
+      "contract_issue_ids": [
+        "C01",
+        "C06"
+      ],
+      "operation_key": "GET /domains/{domain}/spam/whitelist"
+    },
+    {
+      "id": "S023-conflict-spam-duplicate",
+      "kind": "spec-status-hypothetical-envelope",
+      "method": "POST",
+      "path": "/domains/example.com/spam/whitelist",
+      "request": {
+        "json": {
+          "entry": "*@trusted.example"
+        }
+      },
+      "response": {
+        "status": 409,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "error": {
+            "code": "CONFLICT",
+            "message": "The entry already exists"
+          }
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Treat case-insensitive duplicate as conflict and reconcile with a complete list read. Body envelope is illustrative; the operation documents status/meaning but no content schema.",
+      "contract_issue_ids": [
+        "C01",
+        "C06"
+      ],
+      "operation_key": "POST /domains/{domain}/spam/whitelist"
+    },
+    {
+      "id": "S024-unprocessable-package-in-use",
+      "kind": "spec-status-hypothetical-envelope",
+      "method": "DELETE",
+      "path": "/reseller/packages/starter",
+      "response": {
+        "status": 422,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "error": {
+            "code": "BUSINESS_ERROR",
+            "message": "Package is in use"
+          }
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Return a business-rule error and preserve package state. Body envelope is illustrative; only status and the in-use condition are declared for this operation.",
+      "contract_issue_ids": [
+        "C04",
+        "C06"
+      ],
+      "operation_key": "DELETE /reseller/packages/{name}"
+    },
+    {
+      "id": "S025-rate-limited-retry-after",
+      "kind": "spec-status-hypothetical-envelope",
+      "method": "GET",
+      "path": "/domains",
+      "response": {
+        "status": 429,
+        "headers": {
+          "Content-Type": "application/json",
+          "Retry-After": "30",
+          "X-RateLimit-Limit": "200",
+          "X-RateLimit-Remaining": "0",
+          "X-RateLimit-Reset": "1792434630"
+        },
+        "body": {
+          "success": false,
+          "error": {
+            "code": "RATE_LIMITED",
+            "message": "Too many requests. Please try again later."
+          }
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Honor Retry-After within a bounded read retry policy; preserve state if the deadline expires. Rate-limit response shape is globally described but status is not listed on this specific operation.",
+      "contract_issue_ids": [
+        "C06",
+        "C13"
+      ],
+      "operation_key": "GET /domains"
+    },
+    {
+      "id": "S026-server-error-spam-unavailable",
+      "kind": "spec-status-hypothetical-envelope",
+      "method": "GET",
+      "path": "/domains/example.com/spam/settings",
+      "response": {
+        "status": 500,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "error": {
+            "code": "SERVER_ERROR",
+            "message": "Spam settings could not be safely read"
+          }
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Report the read failure and preserve prior Terraform state; never substitute a default score. Envelope shape is schema-backed for SpamUnavailable but exact code/message are synthetic.",
+      "contract_issue_ids": [
+        "C01",
+        "C06"
+      ],
+      "operation_key": "GET /domains/{domain}/spam/settings"
+    },
+    {
+      "id": "S027-service-unavailable-spam-busy",
+      "kind": "spec-status-hypothetical-envelope",
+      "method": "PATCH",
+      "path": "/domains/example.com/spam/settings",
+      "request": {
+        "json": {
+          "high_score": 20
+        }
+      },
+      "response": {
+        "status": 503,
+        "headers": {
+          "Content-Type": "application/json",
+          "Retry-After": "2"
+        },
+        "body": {
+          "success": false,
+          "error": {
+            "code": "SERVER_ERROR",
+            "message": "Another account update is in progress"
+          }
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Treat busy/lock-unavailable as an unconfirmed write, read settings before deciding whether a bounded retry is safe, and preserve state on unresolved outcome. Body details are synthetic; 503 references SpamBusy.",
+      "contract_issue_ids": [
+        "C01",
+        "C05",
+        "C06"
+      ],
+      "operation_key": "PATCH /domains/{domain}/spam/settings"
+    },
+    {
+      "id": "S028-unexpected-success-false-200",
+      "kind": "hypothetical-defensive-variant",
+      "method": "GET",
+      "path": "/domains",
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "error": {
+            "code": "BUSINESS_ERROR",
+            "message": "Request was not completed"
+          }
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Treat success:false as failure even on HTTP 200; preserve state. This status/body combination is a defensive synthetic variant, not documented operation behavior.",
+      "contract_issue_ids": [
+        "C06",
+        "C13"
+      ],
+      "operation_key": "GET /domains"
+    },
+    {
+      "id": "S028b-sparse-write-success-false-200",
+      "kind": "hypothetical-defensive-variant",
+      "method": "PATCH",
+      "path": "/domains/example.com/mail-status",
+      "request": {
+        "json": {
+          "enabled": false
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": false,
+          "error": {
+            "code": "BUSINESS_ERROR",
+            "message": "Update was not completed"
+          }
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Treat the global failure envelope as an operation failure even though this sparse write's 200 response declares no body; do not mark the desired value applied. This pairing is hypothetical, but failure-envelope handling on 2xx is required defensively.",
+      "contract_issue_ids": [
+        "C06",
+        "C11",
+        "C13"
+      ],
+      "operation_key": "PATCH /domains/{domain}/mail-status"
+    },
+    {
+      "id": "S029-malformed-success-json",
+      "kind": "hypothetical-defensive-variant",
+      "method": "GET",
+      "path": "/domains",
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": "{\"success\":true,\"data\":[",
+        "body_encoding": "raw"
+      },
+      "expectation": "Return a decode error and preserve prior state; malformed success is never interpreted as an empty list.",
+      "contract_issue_ids": [
+        "C06",
+        "C10",
+        "C11"
+      ],
+      "operation_key": "GET /domains"
+    },
+    {
+      "id": "S030-success-envelope-missing-data",
+      "kind": "hypothetical-defensive-variant",
+      "method": "GET",
+      "path": "/domains",
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Return a contract/decode error and preserve state; missing required list data does not represent an empty list.",
+      "contract_issue_ids": [
+        "C06",
+        "C10",
+        "C11"
+      ],
+      "operation_key": "GET /domains"
+    },
+    {
+      "id": "S031-success-empty-body-on-json-read",
+      "kind": "hypothetical-defensive-variant",
+      "method": "GET",
+      "path": "/domains/example.com",
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": null,
+        "body_encoding": "empty"
+      },
+      "expectation": "Return a decode/contract error and preserve state because this GET documents a JSON body; empty body acceptance applies only to operations whose success contract is sparse.",
+      "contract_issue_ids": [
+        "C06",
+        "C11"
+      ],
+      "operation_key": "GET /domains/{domain}"
+    },
+    {
+      "id": "S034-quota-wrapped-live-regression",
+      "kind": "sanitized-structure-regression",
+      "method": "GET",
+      "path": "/quota",
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "username": "owner",
+            "total_used": 0,
+            "total_limit": 0,
+            "percent_used": 0,
+            "breakdown": {
+              "email": 0,
+              "web": 0,
+              "databases": 0,
+              "backups": 0,
+              "other": 0
+            },
+            "grace_period": null,
+            "updated_at": "2026-10-19T08:00:00-04:00"
+          }
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Accept a complete standard success/data envelope as well as the published raw-object schema; reject incomplete or false-success envelopes. All values here are synthetic.",
+      "contract_issue_ids": [
+        "C11",
+        "C12"
+      ],
+      "operation_key": "GET /quota"
+    },
+    {
+      "id": "S035-quota-wrapped-live-regression",
+      "kind": "sanitized-structure-regression",
+      "method": "GET",
+      "path": "/quota/email",
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "success": true,
+          "data": {
+            "username": "owner",
+            "accounts": []
+          }
+        },
+        "body_encoding": "json"
+      },
+      "expectation": "Accept a complete standard success/data envelope as well as the published raw-object schema; reject incomplete or false-success envelopes. All values here are synthetic.",
+      "contract_issue_ids": [
+        "C11",
+        "C12"
+      ],
+      "operation_key": "GET /quota/email"
+    }
+  ],
+  "body_convention": "response.body is a parsed JSON value; null means zero response bytes. body_encoding=raw means body is literal response text instead of a JSON string. request.runtime_fields describes values generated only in memory by the future mock harness; no literal passwords are stored."
+}

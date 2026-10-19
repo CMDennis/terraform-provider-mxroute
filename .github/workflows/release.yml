@@ -1,0 +1,118 @@
+name: Prepare beta release draft
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing reviewed beta tag on main (for example v0.1.0-beta.1)
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: provider-release
+  cancel-in-progress: false
+env:
+  GOTOOLCHAIN: go1.26.9
+  RELEASE_TAG: ${{ inputs.tag }}
+  MXROUTE_SERVER: ''
+  MXROUTE_USERNAME: ''
+  MXROUTE_API_KEY: ''
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require canonical repository and reviewed beta tag
+        shell: bash
+        run: |
+          test "$GITHUB_REPOSITORY" = 'CMDennis/terraform-provider-mxroute'
+          test "$GITHUB_REF" = 'refs/heads/main'
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+$ ]]
+          git rev-parse --verify "refs/tags/$RELEASE_TAG^{commit}"
+          git merge-base --is-ancestor "refs/tags/$RELEASE_TAG" origin/main
+          git checkout --detach "refs/tags/$RELEASE_TAG"
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: '1.26.9'
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_version: '1.11.1'
+          terraform_wrapper: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m pip install -r requirements-dev.txt
+      - run: make check build vuln snapshot
+      - name: Install packaged production binary and test mock lifecycle
+        run: make release-smoke
+        env:
+          MXROUTE_RELEASE_ARCHIVE: /tmp/mxroute-provider-dist/terraform-provider-mxroute_0.1.0-beta.1-dev_linux_amd64.zip
+  draft:
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: provider-release
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.tag }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: '1.26.9'
+      - name: Require private account privacy check before exposing signing material
+        run: python3 scripts/privacy_check.py --worktree --history --require-private-rules
+        env:
+          MXROUTE_PRIVACY_FINGERPRINTS: ${{ secrets.PRIVACY_FINGERPRINTS }}
+      - name: Import project release key
+        id: key
+        uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+      - name: Require separately configured signing identity
+        env:
+          IMPORTED_FINGERPRINT: ${{ steps.key.outputs.fingerprint }}
+          EXPECTED_FINGERPRINT: ${{ vars.GPG_FINGERPRINT }}
+        run: |
+          test -n "$EXPECTED_FINGERPRINT"
+          test "$IMPORTED_FINGERPRINT" = "$EXPECTED_FINGERPRINT"
+      - name: Build and sign without uploading
+        env:
+          GPG_FINGERPRINT: ${{ vars.GPG_FINGERPRINT }}
+        run: |
+          go run github.com/goreleaser/goreleaser/v2@v2.17.0 release --clean --skip=publish
+          cp terraform-registry-manifest.json "/tmp/mxroute-provider-dist/terraform-provider-mxroute_${RELEASE_TAG#v}_manifest.json"
+      - name: Verify real release assets and scan archives
+        env:
+          GPG_FINGERPRINT: ${{ vars.GPG_FINGERPRINT }}
+          MXROUTE_PRIVACY_FINGERPRINTS: ${{ secrets.PRIVACY_FINGERPRINTS }}
+        run: |
+          gpg --batch --armor --export "$GPG_FINGERPRINT" > /tmp/provider-release-public.asc
+          python3 scripts/verify_release.py --directory /tmp/mxroute-provider-dist --version "${RELEASE_TAG#v}" --public-key /tmp/provider-release-public.asc --fingerprint "$GPG_FINGERPRINT"
+          python3 scripts/privacy_check.py --artifact-dir /tmp/mxroute-provider-dist --require-private-rules
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_version: '1.11.1'
+          terraform_wrapper: false
+      - name: Smoke-test the signed version's native package
+        env:
+          MXROUTE_REQUIRE_RELEASE_LIFECYCLE: 'true'
+        run: |
+          export MXROUTE_RELEASE_ARCHIVE="/tmp/mxroute-provider-dist/terraform-provider-mxroute_${RELEASE_TAG#v}_linux_amd64.zip"
+          make release-smoke
+      - name: Create draft only; an existing release is never overwritten
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          prefix="/tmp/mxroute-provider-dist/terraform-provider-mxroute_${RELEASE_TAG#v}"
+          gh release create "$RELEASE_TAG" --verify-tag --draft --prerelease --title "$RELEASE_TAG" --notes-file docs/design/release-notes-beta.md \
+            "${prefix}"_{darwin,linux,windows}_{amd64,arm64}.zip \
+            "${prefix}_manifest.json" "${prefix}_SHA256SUMS" "${prefix}_SHA256SUMS.sig"

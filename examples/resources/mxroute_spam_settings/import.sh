@@ -1,0 +1,1 @@
+terraform import mxroute_spam_settings.account example.com

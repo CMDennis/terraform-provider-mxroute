@@ -1,0 +1,48 @@
+version: 2
+project_name: terraform-provider-mxroute
+dist: /tmp/mxroute-provider-dist
+snapshot:
+  version_template: '0.1.0-beta.1-dev'
+builds:
+  - id: provider
+    main: .
+    binary: terraform-provider-mxroute_v{{ .Version }}
+    env: [CGO_ENABLED=0]
+    goos: [darwin, linux, windows]
+    goarch: [amd64, arm64]
+    flags: [-trimpath]
+    ldflags: ['-s -w -X main.version={{ .Version }}']
+archives:
+  - formats: [zip]
+    name_template: 'terraform-provider-mxroute_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    files: [LICENSE]
+checksum:
+  name_template: 'terraform-provider-mxroute_{{ .Version }}_SHA256SUMS'
+  extra_files:
+    - glob: terraform-registry-manifest.json
+      name_template: 'terraform-provider-mxroute_{{ .Version }}_manifest.json'
+signs:
+  - artifacts: checksum
+    args:
+      - --batch
+      - --yes
+      - --local-user
+      - '{{ .Env.GPG_FINGERPRINT }}'
+      - --output
+      - '${signature}'
+      - --detach-sign
+      - '${artifact}'
+release:
+  # The protected workflow creates a draft with gh only after verification.
+  disable: true
+  draft: true
+  prerelease: true
+  make_latest: false
+  replace_existing_draft: false
+  use_existing_draft: false
+  replace_existing_artifacts: false
+  extra_files:
+    - glob: terraform-registry-manifest.json
+      name_template: 'terraform-provider-mxroute_{{ .Version }}_manifest.json'
+changelog:
+  disable: true

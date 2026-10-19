@@ -1,0 +1,18 @@
+{
+  "source_url": "https://api.mxroute.com/openapi.yaml",
+  "documentation_url": "https://api.mxroute.com/docs",
+  "retrieved_on": "2026-10-19",
+  "snapshot": "api/snapshots/openapi-2026-10-19.yaml",
+  "sha256": "3ac0cb631192ca0095b2c0e0cdeb90e09da0d9a42105d5c2dbd796a8fdc73e57",
+  "openapi_version": "3.0.3",
+  "api_version": "1.0.0",
+  "operation_count": 43,
+  "path_count": 26,
+  "operation_key": "HTTP METHOD + path; upstream has no operationId",
+  "authenticated_requests": false,
+  "upstream_sha256": "25272af35138b6ef4dc79eccd6ea1876fa1b30c97ae56be6dc0ba8a01d6e879d",
+  "sanitization": {
+    "credential_examples_redacted": 1,
+    "description": "Only the credential-shaped authentication example was replaced with a symbolic placeholder; API schemas and operations are unchanged."
+  }
+}

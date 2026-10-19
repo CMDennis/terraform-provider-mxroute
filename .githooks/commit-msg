@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+message_file="$1"
+cd "$(git rev-parse --show-toplevel)"
+python3 scripts/privacy_check.py --message-file "$message_file" --require-private-rules

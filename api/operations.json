@@ -1,0 +1,3505 @@
+{
+  "baseline": {
+    "source_url": "https://api.mxroute.com/openapi.yaml",
+    "documentation_url": "https://api.mxroute.com/docs",
+    "retrieved_on": "2026-10-19",
+    "snapshot": "api/snapshots/openapi-2026-10-19.yaml",
+    "sha256": "3ac0cb631192ca0095b2c0e0cdeb90e09da0d9a42105d5c2dbd796a8fdc73e57",
+    "openapi_version": "3.0.3",
+    "api_version": "1.0.0",
+    "operation_count": 43,
+    "path_count": 26,
+    "operation_key": "HTTP METHOD + path; upstream has no operationId",
+    "authenticated_requests": false,
+    "upstream_sha256": "25272af35138b6ef4dc79eccd6ea1876fa1b30c97ae56be6dc0ba8a01d6e879d",
+    "sanitization": {
+      "credential_examples_redacted": 1,
+      "description": "Only the credential-shaped authentication example was replaced with a symbolic placeholder; API schemas and operations are unchanged."
+    }
+  },
+  "info": {
+    "title": "MXroute Email Hosting API",
+    "description": "REST API for managing MXroute email hosting accounts.\n\n## Authentication\n\nAll API requests require three HTTP headers:\n\n| Header | Description |\n|--------|-------------|\n| `X-Server` | Your mail server hostname (e.g., `eagle.mxlogin.com`) |\n| `X-Username` | Your DirectAdmin username, or `reseller\\|user` for an owned user |\n| `X-API-Key` | Your complete API key password, or account password if permitted by DirectAdmin |\n\nCreate API keys in your [mxpanel dashboard](https://panel.mxroute.com/api-keys.php).\nSend the complete credential unchanged, including any colons. Do not prepend\nthe key ID; legacy `keyid:password` parsing is no longer supported.\nAccount passwords require DirectAdmin to permit password-based API access\n(`api_with_password=yes` in the account's `user.conf`). Login keys are\nunaffected by that setting.\n\n### Reseller impersonation\n\nTo manage an owned user, send `X-Username: reseller|user` with the reseller's\nown complete API key in `X-API-Key` and their server in `X-Server`.\nEach name must contain 1–16 letters, digits or underscores. Chained pipes\nand self-impersonation are rejected; use a plain username for your own account.\n\nThe API verifies the credential owner's reseller role, then authenticates\nto DirectAdmin as `reseller|user`. DirectAdmin must authorize the target;\nthe returned real and effective identities must match. Only ordinary user\ntargets are supported. Admin credentials and user-to-user impersonation\nare not supported by this feature. The key's DirectAdmin restrictions remain\nin force and must permit session queries, impersonation and the requested action.\n\nAll account and domain operations apply to the target user. Reseller-only\nendpoints are unavailable while impersonating; send the plain reseller\nusername to manage users or packages. The reseller and all impersonated\ntargets share the reseller's rate-limit bucket on that server.\n\n```bash\ncurl 'https://api.mxroute.com/domains' \\\n  -H 'X-Server: eagle.mxlogin.com' \\\n  -H 'X-Username: reseller|user' \\\n  -H 'X-API-Key: YOUR_RESELLER_API_KEY'\n```\n\n## Rate Limits\n\n| Operation Type | Limit |\n|----------------|-------|\n| Read (GET) | 200 requests/minute |\n| Write (POST, PATCH, DELETE) | 60 requests/minute |\n| Bulk/import | 10 requests/minute |\n\nRate limit headers are included in every response:\n- `X-RateLimit-Limit`: Maximum requests allowed\n- `X-RateLimit-Remaining`: Requests remaining in window\n- `X-RateLimit-Reset`: Unix timestamp when limit resets\n\n## Error Responses\n\nAll errors follow this format:\n```json\n{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"ERROR_CODE\",\n    \"message\": \"Human-readable message\",\n    \"field\": \"field_name\"  // Optional, for validation errors\n  }\n}\n```\n\nCommon error codes:\n- `VALIDATION_ERROR` - Invalid input data\n- `UNAUTHORIZED` - Invalid or missing credentials\n- `FORBIDDEN` - Insufficient permissions\n- `NOT_FOUND` - Resource not found\n- `CONFLICT` - Resource already exists\n- `BUSINESS_ERROR` - Business logic violation (e.g., limit reached)\n- `RATE_LIMITED` - Too many requests\n- `SERVER_ERROR` - Internal server error\n",
+    "version": "1.0.0",
+    "contact": {
+      "name": "MXroute Support",
+      "url": "https://mxroute.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.mxroute.com",
+      "description": "Production API"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Domains",
+      "description": "Domain management"
+    },
+    {
+      "name": "Domain Pointers",
+      "description": "Domain aliases and redirects"
+    },
+    {
+      "name": "Email Accounts",
+      "description": "Email account management"
+    },
+    {
+      "name": "Email Forwarders",
+      "description": "Email forwarding rules"
+    },
+    {
+      "name": "Spam Settings",
+      "description": "Spam filter configuration. Sender lists are shared across an account's domains.\nEvery operation requires an owned domain. Writes preserve unrelated settings.\nRequest bodies are limited to 2048 bytes and accept only the documented field.\nUnsupported or unavailable upstream settings cause an error, never default values.\nUpdates to the same account are serialized across the panel and REST API.\nAfter an unconfirmed save, read the settings before deciding whether to retry.\n"
+    },
+    {
+      "name": "DNS Info",
+      "description": "DNS configuration information (read-only)"
+    },
+    {
+      "name": "Catch-All",
+      "description": "Catch-all email settings"
+    },
+    {
+      "name": "Quota",
+      "description": "Disk usage and quota information"
+    },
+    {
+      "name": "Reseller Users",
+      "description": "User management (reseller only)"
+    },
+    {
+      "name": "Reseller Packages",
+      "description": "Package management (reseller only)"
+    },
+    {
+      "name": "Account",
+      "description": "Account-level information"
+    }
+  ],
+  "security": [
+    {
+      "serverAuth": [],
+      "usernameAuth": [],
+      "apiKeyAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "Your complete API key password (created at panel.mxroute.com/api-keys.php),\nor account password if DirectAdmin permits password-based API access.\nSent unchanged, including colons. Do not prepend a key ID.\nFor reseller impersonation, use the reseller's key, not the target user's.\nExample: `[API_KEY_FROM_SECRET_STORE]`\n"
+      },
+      "serverAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Server",
+        "description": "Your mail server hostname (shown on API Keys page).\nExample: `eagle.mxlogin.com`\n"
+      },
+      "usernameAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Username",
+        "description": "Your DirectAdmin username (shown on API Keys page), or `reseller|user`\nto act as an ordinary user owned by that reseller. Each name is 1–16\nletters, digits or underscores. Use the reseller's key with the pipe form.\nExamples: `johndoe`, `reseller|johndoe`.\n"
+      }
+    },
+    "schemas": {
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "object"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "example": "VALIDATION_ERROR"
+              },
+              "message": {
+                "type": "string",
+                "example": "Invalid domain format"
+              },
+              "field": {
+                "type": "string",
+                "example": "domain"
+              }
+            }
+          }
+        }
+      },
+      "Domain": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "example": "example.com"
+          },
+          "mail_hosting": {
+            "type": "boolean",
+            "example": true
+          },
+          "ssl_enabled": {
+            "type": "boolean",
+            "example": true
+          },
+          "pointers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "EmailAccount": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "your_mailbox"
+          },
+          "email": {
+            "type": "string",
+            "example": "your_mailbox@example.com"
+          },
+          "quota": {
+            "type": "integer",
+            "description": "Quota in MB (0 = unlimited)",
+            "example": 1024
+          },
+          "usage": {
+            "type": "number",
+            "description": "Current usage in MB",
+            "example": 256.5
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Daily send limit",
+            "example": 9600
+          },
+          "sent": {
+            "type": "integer",
+            "description": "Emails sent today",
+            "example": 42
+          },
+          "suspended": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
+      "Forwarder": {
+        "type": "object",
+        "properties": {
+          "alias": {
+            "type": "string",
+            "example": "your_alias"
+          },
+          "email": {
+            "type": "string",
+            "example": "your_alias@example.com"
+          },
+          "destinations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "recipient@otherdomain.com"
+            ]
+          }
+        }
+      },
+      "DomainPointer": {
+        "type": "object",
+        "properties": {
+          "pointer": {
+            "type": "string",
+            "example": "alias.com"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "alias",
+              "redirect"
+            ],
+            "example": "alias"
+          },
+          "target": {
+            "type": "string",
+            "example": "example.com"
+          }
+        }
+      },
+      "DnsInfo": {
+        "type": "object",
+        "properties": {
+          "mx_records": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "priority": {
+                  "type": "integer"
+                },
+                "hostname": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "spf": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "example": "TXT"
+              },
+              "name": {
+                "type": "string",
+                "example": "@"
+              },
+              "value": {
+                "type": "string",
+                "example": "v=spf1 include:mxroute.com -all"
+              }
+            }
+          },
+          "dkim": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            }
+          },
+          "verification": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "CatchAll": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "fail",
+              "blackhole",
+              "address"
+            ],
+            "example": "fail"
+          },
+          "address": {
+            "type": "string",
+            "nullable": true,
+            "example": "catchall@example.com"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "ResellerUser": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "johndoe"
+          },
+          "email": {
+            "type": "string",
+            "example": "john@example.com"
+          },
+          "domain": {
+            "type": "string",
+            "example": "example.com"
+          },
+          "package": {
+            "type": "string",
+            "example": "basic"
+          },
+          "suspended": {
+            "type": "boolean",
+            "example": false
+          },
+          "quota": {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": "integer",
+                "nullable": true
+              },
+              "used": {
+                "type": "number"
+              },
+              "unlimited": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "Package": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "basic"
+          },
+          "settings": {
+            "type": "object",
+            "properties": {
+              "quota_gb": {
+                "type": "number",
+                "nullable": true
+              },
+              "quota_unlimited": {
+                "type": "boolean"
+              },
+              "domains": {
+                "type": "integer",
+                "nullable": true
+              },
+              "email_accounts": {
+                "type": "integer",
+                "nullable": true,
+                "description": "Usable customer mailbox limit; excludes the system mailbox. Zero permits no customer mailboxes; null means unlimited."
+              },
+              "email_forwarders": {
+                "type": "integer",
+                "nullable": true
+              },
+              "domain_pointers": {
+                "type": "integer",
+                "nullable": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "SpamUnavailable": {
+        "description": "Spam settings could not be safely read or the update could not be confirmed",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "SpamBusy": {
+        "description": "Another account update is in progress or secure update locking is unavailable",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Authentication failed",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "success": false,
+              "error": {
+                "code": "UNAUTHORIZED",
+                "message": "Invalid API credentials"
+              }
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "success": false,
+              "error": {
+                "code": "NOT_FOUND",
+                "message": "Resource not found"
+              }
+            }
+          }
+        }
+      },
+      "RateLimited": {
+        "description": "Rate limit exceeded",
+        "headers": {
+          "Retry-After": {
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Seconds until rate limit resets"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "success": false,
+              "error": {
+                "code": "RATE_LIMITED",
+                "message": "Too many requests. Please try again later."
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "operations": [
+    {
+      "key": "DELETE /domains/{domain}",
+      "client_method": "DeleteDomain",
+      "terraform": [
+        "resource mxroute_domain.delete"
+      ],
+      "phase": 3,
+      "tests": [
+        "TestClient_DeleteDomain",
+        "TestOfflineDomainWorkflow"
+      ],
+      "documentation": [
+        "docs/resources/domain.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C03",
+        "C06",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [
+        "C03"
+      ],
+      "summary": "Delete domain",
+      "description": "Remove a domain from the account",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "example": "example.com"
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "204": {
+          "description": "Domain deleted"
+        }
+      }
+    },
+    {
+      "key": "DELETE /domains/{domain}/email-accounts/{user}",
+      "client_method": "DeleteEmailAccount",
+      "terraform": [
+        "resource mxroute_email_account.delete"
+      ],
+      "phase": 4,
+      "tests": [
+        "TestClient_DeleteEmailAccount",
+        "TestOfflineMailboxLifecycle",
+        "TestOfflineMailboxDefaultsAndDrift",
+        "TestOfflineMailReadFailuresPreserveState",
+        "TestOfflineMailboxImportAdoptionAndRotation",
+        "TestOfflineMailboxFailedUpdatePreservesState",
+        "TestOfflineMailWorkflowDependencies"
+      ],
+      "documentation": [
+        "docs/resources/email_account.md",
+        "docs/data-sources/email_account.md",
+        "docs/data-sources/email_accounts.md",
+        "docs/design/mailbox-live-testing.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; explicit owned-test-mailbox deletion through Terraform live-passed with independent absence/baseline verification; broader destructive lifecycle behavior live-unverified",
+      "contract_issue_ids": [
+        "C03",
+        "C06",
+        "C09",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [
+        "C03"
+      ],
+      "summary": "Delete email account",
+      "description": "",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "user",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "204": {
+          "description": "Account deleted"
+        }
+      }
+    },
+    {
+      "key": "DELETE /domains/{domain}/forwarders/{alias}",
+      "client_method": "DeleteForwarder",
+      "terraform": [
+        "resource mxroute_forwarder.delete"
+      ],
+      "phase": 4,
+      "tests": [
+        "TestClient_DeleteForwarder",
+        "TestOfflineRoutingLifecycle",
+        "TestOfflineForwarderReplacementFailure",
+        "TestOfflineForwarderFailedDeletePreservesRouting",
+        "TestOfflineRoutingDriftAndDeletion",
+        "TestOfflineMailWorkflowDependencies"
+      ],
+      "documentation": [
+        "docs/resources/forwarder.md",
+        "docs/data-sources/forwarder.md",
+        "docs/data-sources/forwarders.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C02",
+        "C06",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Delete email forwarder",
+      "description": "",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "alias",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "204": {
+          "description": "Forwarder deleted"
+        }
+      }
+    },
+    {
+      "key": "DELETE /domains/{domain}/pointers/{pointer}",
+      "client_method": "DeleteDomainPointer",
+      "terraform": [
+        "resource mxroute_domain_pointer.delete"
+      ],
+      "phase": 3,
+      "tests": [
+        "TestClient_DeleteDomainPointer",
+        "TestOfflineDomainWorkflow",
+        "TestOfflineDomainDriftAndDeletion",
+        "TestOfflineOnboardingDNSAndVisibilityWait"
+      ],
+      "documentation": [
+        "docs/resources/domain_pointer.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C03",
+        "C06",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Delete domain pointer",
+      "description": "",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "pointer",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "204": {
+          "description": "Pointer deleted"
+        }
+      }
+    },
+    {
+      "key": "DELETE /domains/{domain}/spam/blacklist/{entry}",
+      "client_method": "DeleteSpamBlacklistEntry",
+      "terraform": [
+        "resource mxroute_spam_blacklist_entry.delete"
+      ],
+      "phase": 5,
+      "tests": [
+        "TestClient_DeleteSpamBlacklistEntry",
+        "TestOfflineSpamLifecycle",
+        "TestOfflineSpamDriftAndDeletion",
+        "TestOfflineSpamReadErrorsPreserveState",
+        "TestSpamVerifiedSave",
+        "TestSpamConcurrentSharedEntries",
+        "TestSpamCanonicalDeleteAndNoBlindAdoption"
+      ],
+      "documentation": [
+        "docs/resources/spam_blacklist_entry.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C01",
+        "C06",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Remove from blacklist",
+      "description": "",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "entry",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "503": {
+          "$ref": "#/components/responses/SpamBusy"
+        },
+        "400": {
+          "description": "Invalid domain, entry, score, or JSON body"
+        },
+        "403": {
+          "description": "The effective mail account could not be verified"
+        },
+        "404": {
+          "$ref": "#/components/responses/NotFound"
+        },
+        "500": {
+          "$ref": "#/components/responses/SpamUnavailable"
+        },
+        "204": {
+          "description": "Entry removed"
+        }
+      }
+    },
+    {
+      "key": "DELETE /domains/{domain}/spam/whitelist/{entry}",
+      "client_method": "DeleteSpamWhitelistEntry",
+      "terraform": [
+        "resource mxroute_spam_whitelist_entry.delete"
+      ],
+      "phase": 5,
+      "tests": [
+        "TestClient_DeleteSpamWhitelistEntry",
+        "TestOfflineSpamLifecycle",
+        "TestOfflineSpamDriftAndDeletion",
+        "TestOfflineSpamReadErrorsPreserveState",
+        "TestSpamVerifiedSave",
+        "TestSpamConcurrentSharedEntries",
+        "TestSpamCanonicalDeleteAndNoBlindAdoption"
+      ],
+      "documentation": [
+        "docs/resources/spam_whitelist_entry.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C01",
+        "C06",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Remove from whitelist",
+      "description": "",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "entry",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "503": {
+          "$ref": "#/components/responses/SpamBusy"
+        },
+        "400": {
+          "description": "Invalid domain, entry, score, or JSON body"
+        },
+        "403": {
+          "description": "The effective mail account could not be verified"
+        },
+        "404": {
+          "$ref": "#/components/responses/NotFound"
+        },
+        "500": {
+          "$ref": "#/components/responses/SpamUnavailable"
+        },
+        "204": {
+          "description": "Entry removed"
+        }
+      }
+    },
+    {
+      "key": "DELETE /reseller/packages/{name}",
+      "client_method": "DeleteResellerPackage",
+      "terraform": [
+        "resource mxroute_reseller_package.delete"
+      ],
+      "phase": 6,
+      "tests": [
+        "TestClient_DeleteResellerPackage",
+        "TestOfflineResellerLifecycle",
+        "TestOfflineResellerPackageInUse"
+      ],
+      "documentation": [
+        "docs/resources/reseller_package.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C04",
+        "C06",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Delete package",
+      "description": "Package cannot be deleted if it is in use by any users",
+      "parameters": [
+        {
+          "name": "name",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "204": {
+          "description": "Package deleted"
+        },
+        "422": {
+          "description": "Package is in use"
+        }
+      }
+    },
+    {
+      "key": "DELETE /reseller/users/{username}",
+      "client_method": "DeleteResellerUser",
+      "terraform": [
+        "resource mxroute_reseller_user.delete"
+      ],
+      "phase": 6,
+      "tests": [
+        "TestClient_DeleteResellerUser",
+        "TestOfflineResellerLifecycle",
+        "TestOfflineResellerDriftAndReplacement",
+        "TestOfflineResellerImpersonationWorkflow"
+      ],
+      "documentation": [
+        "docs/resources/reseller_user.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C04",
+        "C06",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Delete user",
+      "description": "",
+      "parameters": [
+        {
+          "name": "username",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "204": {
+          "description": "User deleted"
+        }
+      }
+    },
+    {
+      "key": "GET /domains",
+      "client_method": "ListDomains",
+      "terraform": [
+        "data source mxroute_domains",
+        "resource mxroute_domain.read"
+      ],
+      "phase": 3,
+      "tests": [
+        "TestClient_ListDomains",
+        "TestOfflineDomainWorkflow",
+        "TestOfflineDomainDriftAndDeletion",
+        "TestOfflineDomainReadFailuresPreserveState"
+      ],
+      "documentation": [
+        "docs/data-sources/domains.md",
+        "docs/resources/domain.md",
+        "docs/design/phase7.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+      "contract_issue_ids": [
+        "C03",
+        "C06",
+        "C10",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "List domains",
+      "description": "Returns a list of all domains on the account",
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "List of domain names",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "success": true,
+                "data": [
+                  "example.com",
+                  "mydomain.org"
+                ]
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Unauthorized"
+        }
+      }
+    },
+    {
+      "key": "GET /domains/{domain}",
+      "client_method": "GetDomain",
+      "terraform": [
+        "resource mxroute_domain.read",
+        "data source mxroute_domain"
+      ],
+      "phase": 3,
+      "tests": [
+        "TestClient_GetDomain",
+        "TestOfflineDomainWorkflow",
+        "TestOfflineDomainDriftAndDeletion",
+        "TestOfflineDomainReadFailuresPreserveState"
+      ],
+      "documentation": [
+        "docs/resources/domain.md",
+        "docs/data-sources/domain.md",
+        "docs/design/phase7.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+      "contract_issue_ids": [
+        "C03",
+        "C06",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Get domain details",
+      "description": "",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "example": "example.com"
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Domain details",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "$ref": "#/components/schemas/Domain"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "key": "GET /domains/{domain}/catch-all",
+      "client_method": "GetCatchAll",
+      "terraform": [
+        "resource mxroute_catch_all.read",
+        "data source mxroute_catch_all"
+      ],
+      "phase": 4,
+      "tests": [
+        "TestClient_GetCatchAll",
+        "TestOfflineRoutingLifecycle",
+        "TestOfflineRoutingDriftAndDeletion",
+        "TestOfflineRoutingReadFailuresPreserveState",
+        "TestOfflineMailEmptyLists",
+        "TestOfflineMailWorkflowDependencies"
+      ],
+      "documentation": [
+        "docs/resources/catch_all.md",
+        "docs/data-sources/catch_all.md",
+        "docs/design/phase7.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+      "contract_issue_ids": [
+        "C05",
+        "C06",
+        "C11",
+        "C12",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Get catch-all setting",
+      "description": "",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Current catch-all setting",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "$ref": "#/components/schemas/CatchAll"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "key": "GET /domains/{domain}/dns",
+      "client_method": "GetDNSRecords",
+      "terraform": [
+        "data source mxroute_dns_records"
+      ],
+      "phase": 3,
+      "tests": [
+        "TestClient_GetDNSRecords",
+        "TestOfflineDomainWorkflow",
+        "TestOfflineDNSNullRefresh"
+      ],
+      "documentation": [
+        "docs/data-sources/dns_records.md",
+        "docs/design/phase7.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+      "contract_issue_ids": [
+        "C06",
+        "C11",
+        "C12",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Get DNS configuration",
+      "description": "Returns the DNS records you need to configure at your registrar",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "DNS configuration info",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "$ref": "#/components/schemas/DnsInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "key": "GET /domains/{domain}/email-accounts",
+      "client_method": "ListEmailAccounts",
+      "terraform": [
+        "data source mxroute_email_accounts",
+        "resource mxroute_email_account.read"
+      ],
+      "phase": 4,
+      "tests": [
+        "TestClient_ListEmailAccounts",
+        "TestOfflineMailboxLifecycle",
+        "TestOfflineMailboxDefaultsAndDrift",
+        "TestOfflineMailReadFailuresPreserveState",
+        "TestOfflineMailboxImportAdoptionAndRotation",
+        "TestOfflineMailboxFailedUpdatePreservesState",
+        "TestOfflineMailboxConfirmedRotationReadbackFailure",
+        "TestOfflineMailboxExistingCaseVariantRejected",
+        "TestMailValidators",
+        "TestOfflineMailEmptyLists",
+        "TestOfflineMailWorkflowDependencies"
+      ],
+      "documentation": [
+        "docs/resources/email_account.md",
+        "docs/data-sources/email_account.md",
+        "docs/data-sources/email_accounts.md",
+        "docs/design/phase7.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; ordinary-account read and isolated test-mailbox import/refresh/no-change plan live-passed; remaining lifecycle behavior live-unverified",
+      "contract_issue_ids": [
+        "C03",
+        "C06",
+        "C09",
+        "C10",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "List email accounts",
+      "description": "",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "List of email accounts",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EmailAccount"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "key": "GET /domains/{domain}/email-accounts/{user}",
+      "client_method": "GetEmailAccount",
+      "terraform": [
+        "resource mxroute_email_account.read",
+        "data source mxroute_email_account"
+      ],
+      "phase": 4,
+      "tests": [
+        "TestClient_GetEmailAccount",
+        "TestOfflineMailboxLifecycle",
+        "TestOfflineMailboxDefaultsAndDrift",
+        "TestOfflineMailReadFailuresPreserveState",
+        "TestOfflineMailboxImportAdoptionAndRotation",
+        "TestOfflineMailboxFailedUpdatePreservesState",
+        "TestOfflineMailboxConfirmedRotationReadbackFailure",
+        "TestOfflineMailboxExistingCaseVariantRejected",
+        "TestMailValidators",
+        "TestOfflineMailWorkflowDependencies"
+      ],
+      "documentation": [
+        "docs/resources/email_account.md",
+        "docs/data-sources/email_account.md",
+        "docs/data-sources/email_accounts.md",
+        "docs/design/phase7.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; ordinary-account read and isolated test-mailbox import/refresh/no-change plan live-passed; remaining lifecycle behavior live-unverified",
+      "contract_issue_ids": [
+        "C03",
+        "C06",
+        "C09",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Get email account details",
+      "description": "",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "user",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Account details",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "$ref": "#/components/schemas/EmailAccount"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "key": "GET /domains/{domain}/forwarders",
+      "client_method": "ListForwarders",
+      "terraform": [
+        "resource mxroute_forwarder.read",
+        "data source mxroute_forwarders",
+        "data source mxroute_forwarder"
+      ],
+      "phase": 4,
+      "tests": [
+        "TestClient_ListForwarders",
+        "TestOfflineRoutingLifecycle",
+        "TestOfflineForwarderReplacementFailure",
+        "TestOfflineForwarderFailedDeletePreservesRouting",
+        "TestOfflineRoutingDriftAndDeletion",
+        "TestOfflineMailEmptyLists",
+        "TestOfflineMailWorkflowDependencies"
+      ],
+      "documentation": [
+        "docs/resources/forwarder.md",
+        "docs/data-sources/forwarder.md",
+        "docs/data-sources/forwarders.md",
+        "docs/design/phase7.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+      "contract_issue_ids": [
+        "C02",
+        "C06",
+        "C10",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "List email forwarders",
+      "description": "",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "List of forwarders",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Forwarder"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "key": "GET /domains/{domain}/pointers",
+      "client_method": "ListDomainPointers",
+      "terraform": [
+        "resource mxroute_domain_pointer.read",
+        "data source mxroute_domain_pointers",
+        "data source mxroute_domain_pointer"
+      ],
+      "phase": 3,
+      "tests": [
+        "TestClient_ListDomainPointers",
+        "TestOfflineDomainWorkflow",
+        "TestOfflineDomainDriftAndDeletion",
+        "TestOfflineOnboardingDNSAndVisibilityWait"
+      ],
+      "documentation": [
+        "docs/resources/domain_pointer.md",
+        "docs/data-sources/domain_pointers.md",
+        "docs/data-sources/domain_pointer.md",
+        "docs/design/phase7.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+      "contract_issue_ids": [
+        "C03",
+        "C06",
+        "C10",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "List domain pointers",
+      "description": "",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "List of domain pointers",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/DomainPointer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "key": "GET /domains/{domain}/spam/blacklist",
+      "client_method": "GetSpamBlacklist",
+      "terraform": [
+        "resource mxroute_spam_blacklist_entry.read",
+        "data source mxroute_spam_blacklist"
+      ],
+      "phase": 5,
+      "tests": [
+        "TestClient_GetSpamBlacklist",
+        "TestOfflineSpamLifecycle",
+        "TestOfflineSpamDriftAndDeletion",
+        "TestOfflineSpamReadErrorsPreserveState"
+      ],
+      "documentation": [
+        "docs/resources/spam_blacklist_entry.md",
+        "docs/data-sources/spam_blacklist.md",
+        "docs/design/phase7.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+      "contract_issue_ids": [
+        "C01",
+        "C06",
+        "C10",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Get spam blacklist",
+      "description": "",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "400": {
+          "description": "Invalid domain, entry, score, or JSON body"
+        },
+        "403": {
+          "description": "The effective mail account could not be verified"
+        },
+        "404": {
+          "$ref": "#/components/responses/NotFound"
+        },
+        "500": {
+          "$ref": "#/components/responses/SpamUnavailable"
+        },
+        "200": {
+          "description": "Blacklist entries"
+        }
+      }
+    },
+    {
+      "key": "GET /domains/{domain}/spam/settings",
+      "client_method": "GetSpamSettings",
+      "terraform": [
+        "resource mxroute_spam_settings.read",
+        "data source mxroute_spam_settings"
+      ],
+      "phase": 5,
+      "tests": [
+        "TestClient_GetSpamSettings",
+        "TestOfflineSpamLifecycle",
+        "TestOfflineSpamDriftAndDeletion",
+        "TestOfflineSpamReadErrorsPreserveState"
+      ],
+      "documentation": [
+        "docs/resources/spam_settings.md",
+        "docs/data-sources/spam_settings.md",
+        "docs/design/phase7.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+      "contract_issue_ids": [
+        "C01",
+        "C05",
+        "C06",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Get spam settings",
+      "description": "",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "400": {
+          "description": "Invalid domain, entry, score, or JSON body"
+        },
+        "403": {
+          "description": "The effective mail account could not be verified"
+        },
+        "404": {
+          "$ref": "#/components/responses/NotFound"
+        },
+        "500": {
+          "$ref": "#/components/responses/SpamUnavailable"
+        },
+        "200": {
+          "description": "Current spam settings",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "high_score": {
+                        "type": "integer",
+                        "description": "Score threshold for auto-deletion (1-50)"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "key": "GET /domains/{domain}/spam/whitelist",
+      "client_method": "GetSpamWhitelist",
+      "terraform": [
+        "resource mxroute_spam_whitelist_entry.read",
+        "data source mxroute_spam_whitelist"
+      ],
+      "phase": 5,
+      "tests": [
+        "TestClient_GetSpamWhitelist",
+        "TestOfflineSpamLifecycle",
+        "TestOfflineSpamDriftAndDeletion",
+        "TestOfflineSpamReadErrorsPreserveState"
+      ],
+      "documentation": [
+        "docs/resources/spam_whitelist_entry.md",
+        "docs/data-sources/spam_whitelist.md",
+        "docs/design/phase7.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+      "contract_issue_ids": [
+        "C01",
+        "C06",
+        "C10",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Get spam whitelist",
+      "description": "",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "400": {
+          "description": "Invalid domain, entry, score, or JSON body"
+        },
+        "403": {
+          "description": "The effective mail account could not be verified"
+        },
+        "404": {
+          "$ref": "#/components/responses/NotFound"
+        },
+        "500": {
+          "$ref": "#/components/responses/SpamUnavailable"
+        },
+        "200": {
+          "description": "Whitelist entries",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "key": "GET /quota",
+      "client_method": "GetQuota",
+      "terraform": [
+        "data source mxroute_quota"
+      ],
+      "phase": 5,
+      "tests": [
+        "TestClient_GetQuota",
+        "TestOfflineUsageReporting",
+        "TestOfflineUsageReadFailures",
+        "TestQuotaReadsAcceptRawAndWrappedButRejectIncompleteEnvelopes"
+      ],
+      "documentation": [
+        "docs/data-sources/quota.md",
+        "docs/design/phase7.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+      "contract_issue_ids": [
+        "C06",
+        "C11",
+        "C12",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Get disk usage and quota",
+      "description": "Returns overall disk usage, quota limit, usage percentage, category breakdown, and grace period status. Data is refreshed hourly.",
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Quota data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "total_used": {
+                    "type": "integer",
+                    "description": "Total bytes used"
+                  },
+                  "total_limit": {
+                    "type": "integer",
+                    "description": "Quota limit in bytes (0 = unlimited)"
+                  },
+                  "percent_used": {
+                    "type": "number",
+                    "description": "Usage as percentage of limit"
+                  },
+                  "breakdown": {
+                    "type": "object",
+                    "description": "Usage by category in bytes",
+                    "properties": {
+                      "email": {
+                        "type": "integer"
+                      },
+                      "web": {
+                        "type": "integer"
+                      },
+                      "databases": {
+                        "type": "integer"
+                      },
+                      "backups": {
+                        "type": "integer"
+                      },
+                      "other": {
+                        "type": "integer"
+                      }
+                    }
+                  },
+                  "grace_period": {
+                    "type": "object",
+                    "nullable": true,
+                    "description": "Present when account has exceeded quota",
+                    "properties": {
+                      "days_remaining": {
+                        "type": "integer"
+                      },
+                      "deadline": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "updated_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "key": "GET /quota/email",
+      "client_method": "GetEmailUsage",
+      "terraform": [
+        "data source mxroute_email_usage"
+      ],
+      "phase": 5,
+      "tests": [
+        "TestClient_GetEmailUsage",
+        "TestOfflineUsageReporting",
+        "TestOfflineUsageReadFailures",
+        "TestQuotaReadsAcceptRawAndWrappedButRejectIncompleteEnvelopes"
+      ],
+      "documentation": [
+        "docs/data-sources/email_usage.md",
+        "docs/design/phase7.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+      "contract_issue_ids": [
+        "C06",
+        "C11",
+        "C12",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Get per-email disk usage",
+      "description": "Returns disk usage for each email account, sorted by size (largest first). Data is refreshed hourly.",
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Email usage data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "accounts": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "email_address": {
+                          "type": "string"
+                        },
+                        "size_bytes": {
+                          "type": "integer"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "key": "GET /reseller/packages",
+      "client_method": "ListResellerPackages",
+      "terraform": [
+        "data source mxroute_reseller_packages",
+        "resource mxroute_reseller_package.read/create/delete (complete-list presence)"
+      ],
+      "phase": 6,
+      "tests": [
+        "TestClient_ListResellerPackages",
+        "TestOfflineResellerLifecycle",
+        "TestOfflineResellerCreationRules",
+        "TestOfflineResellerReadFailuresPreserveState",
+        "TestOfflineResellerImpersonationWorkflow",
+        "TestResellerExactLookup",
+        "TestResellerConversions"
+      ],
+      "documentation": [
+        "docs/data-sources/reseller_packages.md",
+        "docs/resources/reseller_package.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C04",
+        "C06",
+        "C10",
+        "C11",
+        "C12",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "List packages",
+      "description": "",
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "List of package names",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "key": "GET /reseller/packages/{name}",
+      "client_method": "GetResellerPackage",
+      "terraform": [
+        "resource mxroute_reseller_package.read",
+        "data source mxroute_reseller_package"
+      ],
+      "phase": 6,
+      "tests": [
+        "TestClient_GetResellerPackage",
+        "TestOfflineResellerLifecycle",
+        "TestOfflineResellerDriftAndReplacement",
+        "TestOfflineResellerReadFailuresPreserveState",
+        "TestOfflineResellerImpersonatedResourcesRejected",
+        "TestResellerConversions"
+      ],
+      "documentation": [
+        "docs/resources/reseller_package.md",
+        "docs/data-sources/reseller_package.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C04",
+        "C06",
+        "C11",
+        "C12",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Get package details",
+      "description": "",
+      "parameters": [
+        {
+          "name": "name",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Package details",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "$ref": "#/components/schemas/Package"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "key": "GET /reseller/users",
+      "client_method": "ListResellerUsers",
+      "terraform": [
+        "data source mxroute_reseller_users",
+        "resource mxroute_reseller_user.read/create/delete (complete-list presence)"
+      ],
+      "phase": 6,
+      "tests": [
+        "TestClient_ListResellerUsers",
+        "TestOfflineResellerLifecycle",
+        "TestOfflineResellerDriftAndReplacement",
+        "TestOfflineResellerReadFailuresPreserveState",
+        "TestOfflineResellerCreationRules",
+        "TestOfflineResellerImpersonationWorkflow",
+        "TestResellerExactLookup",
+        "TestResellerConversions"
+      ],
+      "documentation": [
+        "docs/data-sources/reseller_users.md",
+        "docs/resources/reseller_user.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C04",
+        "C06",
+        "C10",
+        "C11",
+        "C12",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "List users",
+      "description": "Returns a list of all users under the reseller account",
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "List of usernames",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "403": {
+          "description": "Requires reseller privileges"
+        }
+      }
+    },
+    {
+      "key": "GET /reseller/users/{username}",
+      "client_method": "GetResellerUser",
+      "terraform": [
+        "resource mxroute_reseller_user.read",
+        "data source mxroute_reseller_user"
+      ],
+      "phase": 6,
+      "tests": [
+        "TestClient_GetResellerUser",
+        "TestOfflineResellerLifecycle",
+        "TestOfflineResellerQuotaOverrideSequencing",
+        "TestOfflineResellerPartialUpdateRecovery",
+        "TestOfflineResellerDriftAndReplacement",
+        "TestOfflineResellerReadFailuresPreserveState",
+        "TestOfflineResellerImpersonatedResourcesRejected",
+        "TestOfflineResellerImpersonationWorkflow"
+      ],
+      "documentation": [
+        "docs/resources/reseller_user.md",
+        "docs/data-sources/reseller_user.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C04",
+        "C06",
+        "C11",
+        "C12",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Get user details",
+      "description": "",
+      "parameters": [
+        {
+          "name": "username",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "User details",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "$ref": "#/components/schemas/ResellerUser"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "key": "GET /verification-key",
+      "client_method": "GetVerificationKey",
+      "terraform": [
+        "data source mxroute_verification_key"
+      ],
+      "phase": 3,
+      "tests": [
+        "TestClient_GetVerificationKey",
+        "TestOfflineDomainWorkflow"
+      ],
+      "documentation": [
+        "docs/data-sources/verification_key.md",
+        "docs/design/phase7.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; ordinary-account read live-passed (Phase 7); mutation/import semantics remain live-unverified",
+      "contract_issue_ids": [
+        "C06",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Get domain verification key",
+      "description": "Returns your domain verification key, which must be added as a DNS TXT record\nbefore adding new domains to your account.\n\n**Automation workflow:**\n1. Call this endpoint to get your verification key\n2. Add a TXT record to your domain: `{key}.yourdomain.com` with value `domain-verified`\n3. Wait for DNS propagation (typically 5-15 minutes)\n4. Call `POST /domains` to add the domain\n",
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Verification key retrieved",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "key": {
+                        "type": "string",
+                        "description": "The verification key (format: _da-verify-{32 hex chars})",
+                        "example": "_da-verify-a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4"
+                      },
+                      "record": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "example": "TXT"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "Use this as the record name (prepend to your domain)",
+                            "example": "_da-verify-a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4"
+                          },
+                          "value": {
+                            "type": "string",
+                            "example": "domain-verified"
+                          }
+                        }
+                      },
+                      "description": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "success": true,
+                "data": {
+                  "key": "_da-verify-a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4",
+                  "record": {
+                    "type": "TXT",
+                    "name": "_da-verify-a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4",
+                    "value": "domain-verified"
+                  },
+                  "description": "Add this TXT record to your domain before adding it to your account"
+                }
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Unauthorized"
+        },
+        "500": {
+          "description": "Unable to retrieve verification key",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              },
+              "example": {
+                "success": false,
+                "error": {
+                  "code": "VERIFICATION_KEY_NOT_FOUND",
+                  "message": "Unable to retrieve verification key for this account"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "key": "PATCH /domains/{domain}/catch-all",
+      "client_method": "SetCatchAll",
+      "terraform": [
+        "resource mxroute_catch_all.create",
+        "resource mxroute_catch_all.update"
+      ],
+      "phase": 4,
+      "tests": [
+        "TestClient_SetCatchAll",
+        "TestOfflineRoutingLifecycle",
+        "TestOfflineRoutingDriftAndDeletion",
+        "TestOfflineRoutingReadFailuresPreserveState",
+        "TestOfflineMailWorkflowDependencies"
+      ],
+      "documentation": [
+        "docs/resources/catch_all.md",
+        "docs/data-sources/catch_all.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C05",
+        "C06",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Set catch-all",
+      "description": "",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "fail",
+                    "blackhole",
+                    "address"
+                  ],
+                  "description": "- `fail`: Reject emails to non-existent addresses\n- `blackhole`: Silently discard\n- `address`: Forward to specified email\n"
+                },
+                "address": {
+                  "type": "string",
+                  "description": "Email address (required if type is \"address\")"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Catch-all updated"
+        }
+      }
+    },
+    {
+      "key": "PATCH /domains/{domain}/email-accounts/{user}",
+      "client_method": "UpdateEmailAccount",
+      "terraform": [
+        "resource mxroute_email_account.update"
+      ],
+      "phase": 4,
+      "tests": [
+        "TestClient_UpdateEmailAccount",
+        "TestOfflineMailboxLifecycle",
+        "TestOfflineMailboxDefaultsAndDrift",
+        "TestOfflineMailReadFailuresPreserveState",
+        "TestOfflineMailboxImportAdoptionAndRotation",
+        "TestOfflineMailboxFailedUpdatePreservesState",
+        "TestOfflineMailboxConfirmedRotationReadbackFailure",
+        "TestOfflineMailboxExistingCaseVariantRejected",
+        "TestMailValidators",
+        "TestOfflineMailWorkflowDependencies",
+        "TestMailboxTestGuardExactScopeAndSequence",
+        "TestMailboxProbePreservesExistingConfigurationAndRetainsOwnership"
+      ],
+      "documentation": [
+        "docs/resources/email_account.md",
+        "docs/data-sources/email_account.md",
+        "docs/data-sources/email_accounts.md",
+        "docs/design/mailbox-live-testing.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; isolated new-mailbox API operation live-passed (Phase 7); Terraform-driven writes and remaining lifecycle behavior live-unverified",
+      "contract_issue_ids": [
+        "C03",
+        "C06",
+        "C08",
+        "C09",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [
+        "C03"
+      ],
+      "summary": "Update email account",
+      "description": "Resolves the mailbox local part case-insensitively to its existing name within the owned domain before updating it. A failed or ambiguous mailbox lookup prevents the update. Omitted quota and limit fields remain unchanged.",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "user",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "password": {
+                  "type": "string",
+                  "description": "New password (8–72 characters). Must also meet the selected mail server's character and strength requirements. Omit to keep the current password.",
+                  "minLength": 8,
+                  "maxLength": 72
+                },
+                "quota": {
+                  "type": "integer",
+                  "description": "New quota in MB"
+                },
+                "limit": {
+                  "type": "integer",
+                  "description": "New daily send limit"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Account updated"
+        },
+        "400": {
+          "description": "Invalid input. Recognized backend password-character and password-strength rejections return distinct messages with field password.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Domain or email account not found.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Mailbox lookup failed or was ambiguous, or the backend update failed for an unrecognized reason. Raw backend errors are not returned.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "key": "PATCH /domains/{domain}/mail-status",
+      "client_method": "SetMailHosting",
+      "terraform": [
+        "resource mxroute_domain.update"
+      ],
+      "phase": 3,
+      "tests": [
+        "TestClient_SetMailHosting",
+        "TestOfflineDomainWorkflow",
+        "TestOfflineDomainDriftAndDeletion",
+        "TestOfflineDomainReadFailuresPreserveState"
+      ],
+      "documentation": [
+        "docs/resources/domain.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C06",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Set mail hosting status",
+      "description": "Enable or disable mail hosting for a domain",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "enabled"
+              ],
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "description": "Whether mail hosting is enabled"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Status updated"
+        }
+      }
+    },
+    {
+      "key": "PATCH /domains/{domain}/spam/settings",
+      "client_method": "UpdateSpamSettings",
+      "terraform": [
+        "resource mxroute_spam_settings.create",
+        "resource mxroute_spam_settings.update"
+      ],
+      "phase": 5,
+      "tests": [
+        "TestClient_UpdateSpamSettings",
+        "TestOfflineSpamLifecycle",
+        "TestOfflineSpamDriftAndDeletion",
+        "TestOfflineSpamReadErrorsPreserveState",
+        "TestSpamVerifiedSave",
+        "TestSpamConcurrentSharedEntries",
+        "TestSpamCanonicalDeleteAndNoBlindAdoption"
+      ],
+      "documentation": [
+        "docs/resources/spam_settings.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C01",
+        "C05",
+        "C06",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Update spam settings",
+      "description": "",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "high_score"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "high_score": {
+                  "type": "integer",
+                  "description": "Score threshold for auto-deletion",
+                  "minimum": 1,
+                  "maximum": 50
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "503": {
+          "$ref": "#/components/responses/SpamBusy"
+        },
+        "400": {
+          "description": "Invalid domain, entry, score, or JSON body"
+        },
+        "403": {
+          "description": "The effective mail account could not be verified"
+        },
+        "404": {
+          "$ref": "#/components/responses/NotFound"
+        },
+        "500": {
+          "$ref": "#/components/responses/SpamUnavailable"
+        },
+        "200": {
+          "description": "Settings updated"
+        }
+      }
+    },
+    {
+      "key": "PATCH /reseller/packages/{name}",
+      "client_method": "UpdateResellerPackage",
+      "terraform": [
+        "resource mxroute_reseller_package.update"
+      ],
+      "phase": 6,
+      "tests": [
+        "TestClient_UpdateResellerPackage",
+        "TestOfflineResellerLifecycle",
+        "TestOfflineResellerDriftAndReplacement"
+      ],
+      "documentation": [
+        "docs/resources/reseller_package.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C04",
+        "C06",
+        "C08",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [
+        "C04"
+      ],
+      "summary": "Update package",
+      "description": "",
+      "parameters": [
+        {
+          "name": "name",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "quota": {
+                  "type": "string"
+                },
+                "domains": {
+                  "type": "string"
+                },
+                "email_accounts": {
+                  "type": "string",
+                  "description": "Usable customer mailbox limit or \"unlimited\". Zero permits no customer mailboxes; omit to preserve the existing limit."
+                },
+                "email_forwarders": {
+                  "type": "string"
+                },
+                "domain_pointers": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Package updated"
+        }
+      }
+    },
+    {
+      "key": "PATCH /reseller/users/{username}",
+      "client_method": "UpdateResellerUser",
+      "terraform": [
+        "resource mxroute_reseller_user.update(password_wo, quota_mb)"
+      ],
+      "phase": 6,
+      "tests": [
+        "TestClient_UpdateResellerUser",
+        "TestOfflineResellerLifecycle",
+        "TestOfflineResellerQuotaOverrideSequencing",
+        "TestOfflineResellerPartialUpdateRecovery",
+        "TestOfflineResellerDriftAndReplacement"
+      ],
+      "documentation": [
+        "docs/resources/reseller_user.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C04",
+        "C06",
+        "C08",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [
+        "C04"
+      ],
+      "summary": "Modify user",
+      "description": "",
+      "parameters": [
+        {
+          "name": "username",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "quota": {
+                  "type": "string",
+                  "description": "Quota in MB or \"unlimited\""
+                },
+                "password": {
+                  "type": "string",
+                  "minLength": 8
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "User updated"
+        }
+      }
+    },
+    {
+      "key": "PATCH /reseller/users/{username}/package",
+      "client_method": "SetResellerUserPackage",
+      "terraform": [
+        "resource mxroute_reseller_user.update(package)"
+      ],
+      "phase": 6,
+      "tests": [
+        "TestClient_SetResellerUserPackage",
+        "TestOfflineResellerLifecycle",
+        "TestOfflineResellerQuotaOverrideSequencing",
+        "TestOfflineResellerPartialUpdateRecovery",
+        "TestOfflineResellerDriftAndReplacement"
+      ],
+      "documentation": [
+        "docs/resources/reseller_user.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C04",
+        "C06",
+        "C08",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [
+        "C04"
+      ],
+      "summary": "Change user's package",
+      "description": "Assign a different package to a user",
+      "parameters": [
+        {
+          "name": "username",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "package"
+              ],
+              "properties": {
+                "package": {
+                  "type": "string",
+                  "description": "Name of the package to assign",
+                  "example": "premium"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Package changed successfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "$ref": "#/components/schemas/ResellerUser"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "403": {
+          "description": "Requires reseller privileges"
+        },
+        "404": {
+          "description": "User not found"
+        },
+        "422": {
+          "description": "Package does not exist"
+        }
+      }
+    },
+    {
+      "key": "POST /domains",
+      "client_method": "CreateDomain",
+      "terraform": [
+        "resource mxroute_domain.create"
+      ],
+      "phase": 3,
+      "tests": [
+        "TestClient_CreateDomain",
+        "TestOfflineDomainWorkflow",
+        "TestOfflineDomainPartialCreateRecovery",
+        "TestOfflineFailedDNSPreventsCreation",
+        "TestOfflineDomainValidationErrorNotRetried",
+        "TestOfflineOnboardingDNSAndVisibilityWait"
+      ],
+      "documentation": [
+        "docs/resources/domain.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C03",
+        "C06",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Create domain",
+      "description": "Add a new domain to the account.",
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "domain"
+              ],
+              "properties": {
+                "domain": {
+                  "type": "string",
+                  "description": "Domain name to add",
+                  "example": "example.com"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Domain created",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": {
+                    "type": "boolean"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "domain": {
+                        "type": "string"
+                      },
+                      "ssl_enabled": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "409": {
+          "description": "Domain already exists"
+        }
+      }
+    },
+    {
+      "key": "POST /domains/{domain}/email-accounts",
+      "client_method": "CreateEmailAccount",
+      "terraform": [
+        "resource mxroute_email_account.create"
+      ],
+      "phase": 4,
+      "tests": [
+        "TestClient_CreateEmailAccount",
+        "TestOfflineMailboxLifecycle",
+        "TestOfflineMailboxDefaultsAndDrift",
+        "TestOfflineMailReadFailuresPreserveState",
+        "TestOfflineMailboxImportAdoptionAndRotation",
+        "TestOfflineMailboxFailedUpdatePreservesState",
+        "TestOfflineMailboxConfirmedRotationReadbackFailure",
+        "TestOfflineMailboxExistingCaseVariantRejected",
+        "TestMailValidators",
+        "TestOfflineMailWorkflowDependencies",
+        "TestMailboxTestGuardExactScopeAndSequence",
+        "TestMailboxProbePreservesExistingConfigurationAndRetainsOwnership"
+      ],
+      "documentation": [
+        "docs/resources/email_account.md",
+        "docs/data-sources/email_account.md",
+        "docs/data-sources/email_accounts.md",
+        "docs/design/mailbox-live-testing.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; isolated new-mailbox API operation live-passed (Phase 7); Terraform-driven writes and remaining lifecycle behavior live-unverified",
+      "contract_issue_ids": [
+        "C03",
+        "C06",
+        "C09",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [
+        "C03"
+      ],
+      "summary": "Create email account",
+      "description": "",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "username",
+                "password"
+              ],
+              "properties": {
+                "username": {
+                  "type": "string",
+                  "description": "Local part of email (the part before @)",
+                  "example": "your_mailbox"
+                },
+                "password": {
+                  "type": "string",
+                  "description": "Must be 8–72 characters and meet the selected mail server's character and strength requirements.",
+                  "minLength": 8,
+                  "maxLength": 72
+                },
+                "quota": {
+                  "type": "integer",
+                  "description": "Storage quota in MB (0 = unlimited)",
+                  "default": 1024
+                },
+                "limit": {
+                  "type": "integer",
+                  "description": "Daily send limit",
+                  "default": 9600,
+                  "maximum": 9600
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Account created"
+        }
+      }
+    },
+    {
+      "key": "POST /domains/{domain}/forwarders",
+      "client_method": "CreateForwarder",
+      "terraform": [
+        "resource mxroute_forwarder.create"
+      ],
+      "phase": 4,
+      "tests": [
+        "TestClient_CreateForwarder",
+        "TestOfflineRoutingLifecycle",
+        "TestOfflineForwarderReplacementFailure",
+        "TestOfflineForwarderFailedDeletePreservesRouting",
+        "TestOfflineRoutingDriftAndDeletion",
+        "TestOfflineMailWorkflowDependencies"
+      ],
+      "documentation": [
+        "docs/resources/forwarder.md",
+        "docs/data-sources/forwarder.md",
+        "docs/data-sources/forwarders.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C02",
+        "C06",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Create email forwarder",
+      "description": "Create a new email forwarder.\n\n**Note:** Forwarding to Yahoo, AOL, Gmail, and similar providers will automatically enable Expert Spam Filtering for the domain to protect your sending reputation.\n\nSpecial destinations:\n- `:blackhole:` - Silently discard emails\n- `:fail:` - Reject with error\n",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "alias",
+                "destinations"
+              ],
+              "properties": {
+                "alias": {
+                  "type": "string",
+                  "description": "Local part of forwarder address (the part before @)",
+                  "example": "your_alias"
+                },
+                "destinations": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Email addresses to forward to",
+                  "example": [
+                    "recipient@otherdomain.com"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Forwarder created"
+        }
+      }
+    },
+    {
+      "key": "POST /domains/{domain}/pointers",
+      "client_method": "CreateDomainPointer",
+      "terraform": [
+        "resource mxroute_domain_pointer.create"
+      ],
+      "phase": 3,
+      "tests": [
+        "TestClient_CreateDomainPointer",
+        "TestOfflineDomainWorkflow",
+        "TestOfflineDomainDriftAndDeletion",
+        "TestOfflineOnboardingDNSAndVisibilityWait"
+      ],
+      "documentation": [
+        "docs/resources/domain_pointer.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C03",
+        "C06",
+        "C07",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [
+        "C03"
+      ],
+      "summary": "Create domain pointer",
+      "description": "",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "pointer"
+              ],
+              "properties": {
+                "pointer": {
+                  "type": "string",
+                  "description": "Domain to point to the target",
+                  "example": "alias.com"
+                },
+                "alias": {
+                  "type": "boolean",
+                  "description": "If true, creates an alias. If false, creates a redirect.",
+                  "default": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Pointer created"
+        }
+      }
+    },
+    {
+      "key": "POST /domains/{domain}/spam/blacklist",
+      "client_method": "AddSpamBlacklistEntry",
+      "terraform": [
+        "resource mxroute_spam_blacklist_entry.create"
+      ],
+      "phase": 5,
+      "tests": [
+        "TestClient_AddSpamBlacklistEntry",
+        "TestOfflineSpamLifecycle",
+        "TestOfflineSpamDriftAndDeletion",
+        "TestOfflineSpamReadErrorsPreserveState",
+        "TestSpamVerifiedSave",
+        "TestSpamConcurrentSharedEntries",
+        "TestSpamCanonicalDeleteAndNoBlindAdoption"
+      ],
+      "documentation": [
+        "docs/resources/spam_blacklist_entry.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C01",
+        "C06",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Add to blacklist",
+      "description": "",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "entry"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "entry": {
+                  "type": "string",
+                  "maxLength": 254,
+                  "pattern": "^[a-zA-Z0-9@.\\-_*+=]+$"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "409": {
+          "description": "The entry already exists (case-insensitive)"
+        },
+        "503": {
+          "$ref": "#/components/responses/SpamBusy"
+        },
+        "400": {
+          "description": "Invalid domain, entry, score, or JSON body"
+        },
+        "403": {
+          "description": "The effective mail account could not be verified"
+        },
+        "404": {
+          "$ref": "#/components/responses/NotFound"
+        },
+        "500": {
+          "$ref": "#/components/responses/SpamUnavailable"
+        },
+        "201": {
+          "description": "Entry added"
+        }
+      }
+    },
+    {
+      "key": "POST /domains/{domain}/spam/whitelist",
+      "client_method": "AddSpamWhitelistEntry",
+      "terraform": [
+        "resource mxroute_spam_whitelist_entry.create"
+      ],
+      "phase": 5,
+      "tests": [
+        "TestClient_AddSpamWhitelistEntry",
+        "TestOfflineSpamLifecycle",
+        "TestOfflineSpamDriftAndDeletion",
+        "TestOfflineSpamReadErrorsPreserveState",
+        "TestSpamVerifiedSave",
+        "TestSpamConcurrentSharedEntries",
+        "TestSpamCanonicalDeleteAndNoBlindAdoption"
+      ],
+      "documentation": [
+        "docs/resources/spam_whitelist_entry.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C01",
+        "C06",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Add to whitelist",
+      "description": "",
+      "parameters": [
+        {
+          "name": "domain",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "entry"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "entry": {
+                  "type": "string",
+                  "maxLength": 254,
+                  "pattern": "^[a-zA-Z0-9@.\\-_*+=]+$",
+                  "description": "Email or pattern (supports wildcards)",
+                  "example": "*@trusted.com"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "409": {
+          "description": "The entry already exists (case-insensitive)"
+        },
+        "503": {
+          "$ref": "#/components/responses/SpamBusy"
+        },
+        "400": {
+          "description": "Invalid domain, entry, score, or JSON body"
+        },
+        "403": {
+          "description": "The effective mail account could not be verified"
+        },
+        "404": {
+          "$ref": "#/components/responses/NotFound"
+        },
+        "500": {
+          "$ref": "#/components/responses/SpamUnavailable"
+        },
+        "201": {
+          "description": "Entry added"
+        }
+      }
+    },
+    {
+      "key": "POST /reseller/packages",
+      "client_method": "CreateResellerPackage",
+      "terraform": [
+        "resource mxroute_reseller_package.create"
+      ],
+      "phase": 6,
+      "tests": [
+        "TestClient_CreateResellerPackage",
+        "TestOfflineResellerLifecycle",
+        "TestOfflineResellerCreationRules",
+        "TestOfflineResellerImpersonatedResourcesRejected"
+      ],
+      "documentation": [
+        "docs/resources/reseller_package.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C04",
+        "C06",
+        "C08",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Create package",
+      "description": "",
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Package name (letters, numbers, underscores, hyphens)"
+                },
+                "quota": {
+                  "type": "string",
+                  "description": "Disk quota in GB or \"unlimited\"",
+                  "default": "1"
+                },
+                "domains": {
+                  "type": "string",
+                  "description": "Number of domains or \"unlimited\"",
+                  "default": "1"
+                },
+                "email_accounts": {
+                  "type": "string",
+                  "description": "Usable customer mailbox limit or \"unlimited\". Zero permits no customer mailboxes; the system mailbox does not consume this allowance.",
+                  "default": "100"
+                },
+                "email_forwarders": {
+                  "type": "string",
+                  "description": "Number of forwarders or \"unlimited\"",
+                  "default": "100"
+                },
+                "domain_pointers": {
+                  "type": "string",
+                  "description": "Number of domain pointers or \"unlimited\"",
+                  "default": "10"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Package created"
+        }
+      }
+    },
+    {
+      "key": "POST /reseller/users",
+      "client_method": "CreateResellerUser",
+      "terraform": [
+        "resource mxroute_reseller_user.create"
+      ],
+      "phase": 6,
+      "tests": [
+        "TestClient_CreateResellerUser",
+        "TestOfflineResellerLifecycle",
+        "TestOfflineResellerCreationRules",
+        "TestOfflineResellerDriftAndReplacement",
+        "TestOfflineResellerImpersonationWorkflow"
+      ],
+      "documentation": [
+        "docs/resources/reseller_user.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C04",
+        "C06",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Create user",
+      "description": "",
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "username",
+                "email",
+                "password",
+                "package"
+              ],
+              "properties": {
+                "username": {
+                  "type": "string",
+                  "description": "1-10 chars, lowercase letters, numbers, underscores",
+                  "example": "johndoe"
+                },
+                "email": {
+                  "type": "string",
+                  "format": "email"
+                },
+                "password": {
+                  "type": "string",
+                  "minLength": 8
+                },
+                "package": {
+                  "type": "string",
+                  "description": "Package name to assign"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "User created"
+        }
+      }
+    },
+    {
+      "key": "POST /reseller/users/{username}/suspend",
+      "client_method": "SuspendResellerUser",
+      "terraform": [
+        "resource mxroute_reseller_user.update(suspended=true)"
+      ],
+      "phase": 6,
+      "tests": [
+        "TestClient_SuspendResellerUser",
+        "TestOfflineResellerLifecycle"
+      ],
+      "documentation": [
+        "docs/resources/reseller_user.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C04",
+        "C06",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Suspend user",
+      "description": "",
+      "parameters": [
+        {
+          "name": "username",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "User suspended"
+        }
+      }
+    },
+    {
+      "key": "POST /reseller/users/{username}/unsuspend",
+      "client_method": "UnsuspendResellerUser",
+      "terraform": [
+        "resource mxroute_reseller_user.update(suspended=false)"
+      ],
+      "phase": 6,
+      "tests": [
+        "TestClient_UnsuspendResellerUser",
+        "TestOfflineResellerLifecycle",
+        "TestOfflineResellerDriftAndReplacement"
+      ],
+      "documentation": [
+        "docs/resources/reseller_user.md"
+      ],
+      "status": "client and Terraform surfaces implemented and mock-tested; reference docs generated; live-unverified",
+      "contract_issue_ids": [
+        "C04",
+        "C06",
+        "C11",
+        "C13"
+      ],
+      "feature_blockers": [],
+      "summary": "Unsuspend user",
+      "description": "",
+      "parameters": [
+        {
+          "name": "username",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "User unsuspended"
+        }
+      }
+    }
+  ]
+}

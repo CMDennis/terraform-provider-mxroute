@@ -1,0 +1,26 @@
+{
+  "checked_on": "2026-10-19",
+  "go_toolchain": "go1.26.9",
+  "platform": "darwin/arm64",
+  "framework": "v1.19.0",
+  "testing": "v1.16.0",
+  "shared_plugin_go": "v0.31.0",
+  "resolved_grpc": "v1.79.3",
+  "result": "PASS TestSelectedAPIsCompile (0.00s); package phase0-compatibility-check (0.230s)",
+  "scope": "Compilation/API compatibility only; no Terraform CLI run and no authenticated MXroute requests. Minimum/current Terraform lifecycle checks are Phase 1+ obligations.",
+  "reproduce_directory": "testdata/compatibility",
+  "reproduce_command": "GOTOOLCHAIN=go1.26.9 go test -mod=readonly -v ./...",
+  "files": {
+    "testdata/compatibility/compatibility_test.go": "bb7a4990ee5161f510d2164c2c5852ba169c92df04fb0f5912bbdcbfdd7322f7",
+    "testdata/compatibility/go.mod": "17859ee40ad7e88acbef91b4b7a991d31ca6c58ba3b46f9d5cb70f52736ec785",
+    "testdata/compatibility/go.sum": "03deb3ed562e172ce06e3f127ea0a8e33e455d40337e43d20b921a44e39843b3"
+  },
+  "sources": [
+    "https://proxy.golang.org/github.com/hashicorp/terraform-plugin-framework/@v/v1.19.0.mod",
+    "https://proxy.golang.org/github.com/hashicorp/terraform-plugin-testing/@v/v1.16.0.mod",
+    "https://github.com/hashicorp/terraform-plugin-framework/releases/tag/v1.19.0",
+    "https://github.com/hashicorp/terraform-plugin-testing/releases/tag/v1.16.0",
+    "https://github.com/hashicorp/terraform/releases/tag/v1.16.6",
+    "https://go.dev/doc/devel/release"
+  ]
+}

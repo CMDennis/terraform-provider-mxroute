@@ -1,0 +1,2 @@
+# Phase 0 inventory tooling only; provider dependencies are selected in docs/design/decisions.md.
+PyYAML==6.0.3
