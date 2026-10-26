@@ -1,7 +1,5 @@
-name: Scheduled compatibility and public API drift
+name: Manual compatibility and public API drift
 on:
-  schedule:
-    - cron: '23 8 * * 1'
   workflow_dispatch:
 permissions:
   contents: read

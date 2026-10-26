@@ -1,6 +1,15 @@
 # Changelog
 
-## Unreleased — proposed v0.1.0-beta.2
+## Unreleased
+
+- Match the EASYDNS release process: pushing a reviewed version tag runs all
+  validation/signing checks and publishes complete assets automatically. Versions
+  with a prerelease suffix remain pre-releases; stable tags publish stable releases.
+- Disable the weekly compatibility/API-drift scan; retain it for manual runs.
+- Update the build/release toolchain to Go 1.26.10 and the newer CI lane to
+  Go 1.27.3, fixing GO-2026-6809 so the release vulnerability gate passes.
+
+## v0.1.0-beta.2
 
 Recovery release for the immutable, assetless `v0.1.0-beta.1` publication. It uses
 the same validated provider code and prepares complete signed platform packages
@@ -17,7 +26,7 @@ under a new version. The previous tag and release remain unchanged.
   protected manual draft releases, offline package installation tests, privacy
   checks, dependency updates and scheduled compatibility/API-drift checks.
 
-This version has **not been published**. Read [the beta release notes](docs/design/release-notes-beta.md)
+Published with all nine provider assets. Read [the beta release notes](docs/design/release-notes-beta.md)
 for the verified scope and remaining live gaps. No prior released state format
 exists. Future entries must describe schema/lifecycle changes and migrations.
 

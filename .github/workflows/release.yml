@@ -1,19 +1,16 @@
-name: Prepare beta release draft
+name: Release
 on:
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: Existing reviewed beta tag on main (for example v0.1.0-beta.1)
-        required: true
-        type: string
+  push:
+    tags:
+      - 'v*'
 permissions:
   contents: read
 concurrency:
   group: provider-release
   cancel-in-progress: false
 env:
-  GOTOOLCHAIN: go1.26.9
-  RELEASE_TAG: ${{ inputs.tag }}
+  GOTOOLCHAIN: go1.26.10
+  RELEASE_TAG: ${{ github.ref_name }}
   MXROUTE_SERVER: ''
   MXROUTE_USERNAME: ''
   MXROUTE_API_KEY: ''
@@ -25,18 +22,20 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Require canonical repository and reviewed beta tag
+      - name: Require canonical repository and version tag on main
         shell: bash
         run: |
           test "$GITHUB_REPOSITORY" = 'CMDennis/terraform-provider-mxroute'
-          test "$GITHUB_REF" = 'refs/heads/main'
-          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+$ ]]
-          git rev-parse --verify "refs/tags/$RELEASE_TAG^{commit}"
-          git merge-base --is-ancestor "refs/tags/$RELEASE_TAG" origin/main
-          git checkout --detach "refs/tags/$RELEASE_TAG"
+          test "$GITHUB_REF_TYPE" = 'tag'
+          if ! [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z]+([.-][0-9A-Za-z]+)*)?$ ]]; then
+            echo 'A semantic-version tag such as v1.0.0 or v0.1.0-beta.3 is required.' >&2
+            exit 1
+          fi
+          test "$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")" = "$(git rev-parse HEAD)"
+          git merge-base --is-ancestor HEAD origin/main
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
-          go-version: '1.26.9'
+          go-version: '1.26.10'
       - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
         with:
           terraform_version: '1.11.1'
@@ -50,7 +49,8 @@ jobs:
         run: make release-smoke
         env:
           MXROUTE_RELEASE_ARCHIVE: /tmp/mxroute-provider-dist/terraform-provider-mxroute_0.1.0-beta.1-dev_linux_amd64.zip
-  draft:
+          MXROUTE_REQUIRE_RELEASE_LIFECYCLE: 'true'
+  publish:
     needs: validate
     runs-on: ubuntu-latest
     environment: provider-release
@@ -59,12 +59,12 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.tag }}
+          ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
-          go-version: '1.26.9'
+          go-version: '1.26.10'
       - name: Require private account privacy check before exposing signing material
         run: python3 scripts/privacy_check.py --worktree --history --require-private-rules
         env:
@@ -106,13 +106,19 @@ jobs:
         run: |
           export MXROUTE_RELEASE_ARCHIVE="/tmp/mxroute-provider-dist/terraform-provider-mxroute_${RELEASE_TAG#v}_linux_amd64.zip"
           make release-smoke
-      - name: Create draft only; an existing release is never overwritten
+      - name: Publish verified release; an existing release is never overwritten
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         shell: bash
         run: |
           prefix="/tmp/mxroute-provider-dist/terraform-provider-mxroute_${RELEASE_TAG#v}"
-          gh release create "$RELEASE_TAG" --verify-tag --draft --prerelease --title "$RELEASE_TAG" --notes-file docs/design/release-notes-beta.md \
+          flags=(--prerelease=false)
+          if [[ "$RELEASE_TAG" == *-* ]]; then
+            flags=(--prerelease --latest=false)
+          fi
+          gh release create "$RELEASE_TAG" --verify-tag --title "$RELEASE_TAG" --generate-notes \
+            --notes "See [validation limits](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/docs/design/phase7.md) for live-testing evidence and unverified behavior." \
+            "${flags[@]}" \
             "${prefix}"_{darwin,linux,windows}_{amd64,arm64}.zip \
             "${prefix}_manifest.json" "${prefix}_SHA256SUMS" "${prefix}_SHA256SUMS.sig"

@@ -1,12 +1,13 @@
 # MXroute Terraform provider
 
-Phase 8 release preparation is implemented locally. The usable beta release being
-prepared is `0.1.0-beta.2`; publication and Registry installation remain pending.
-The earlier `0.1.0-beta.1` was published without assets and locked as immutable;
-it cannot be installed and is retained unchanged. Six platform packages, signed-checksum
-tooling, protected manual draft releases, privacy hooks and ongoing maintenance
-checks are ready. Owner setup and actual Registry installation remain release
-gates. Start with the [manual publishing checklist](docs/design/publishing.md).
+The `0.1.0-beta.2` beta is published with all nine provider assets; clean Registry
+installation still needs verification. The earlier `0.1.0-beta.1` publication had
+no provider assets and could not be installed. Six platform packages, signed-checksum
+tooling, automatic tag-driven releases and privacy hooks are ready. Push a reviewed
+version tag to test, sign, verify and publish automatically, following the same
+process as the EASYDNS provider. The weekly compatibility/API scan is disabled.
+Actual Registry installation remains a release gate. Start with the
+[publishing guide](docs/design/publishing.md).
 
 Phases 0–7 are implemented within the authorized live-test scopes. The provider supports domain
 onboarding, mail-hosting updates, domain pointers, imports, verification-key
@@ -31,7 +32,7 @@ production compatibility is not claimed.
 
 - [Implementation plan](plan.md)
 - [Phase 8 release preparation and verification](docs/design/phase8.md)
-- [Manual GitHub, signing-key and Registry setup](docs/design/publishing.md)
+- [Tag-driven releases, signing-key and Registry setup](docs/design/publishing.md)
 - [Installation, first use, verification and upgrades](docs/design/installation.md)
 - [Privacy safeguards and commit protection](docs/design/privacy.md)
 - [Changelog](CHANGELOG.md), [contributing](CONTRIBUTING.md), [support](SUPPORT.md) and [security](SECURITY.md)
@@ -61,7 +62,7 @@ production compatibility is not claimed.
 
 ## Build and verify locally
 
-Use Go 1.26.9 (or the tested 1.27.1 line), Terraform >= 1.11.1 and < 2.0,
+Use Go 1.26.10 (or the tested 1.27.3 line), Terraform >= 1.11.1 and < 2.0,
 Python >= 3.10, and the pinned Python dependency below. Go modules and development
 tools are pinned in `go.mod` and `Makefile`. Initial downloads require network
 access; all account operations in tests use a synthetic loopback service.
@@ -80,8 +81,8 @@ temporary directories outside the checkout. No real account is needed.
 
 The binary is written to `/tmp/mxroute-provider-build/terraform-provider-mxroute`.
 Use a local Terraform CLI development override for
-`registry.terraform.io/cmdennis/mxroute` pointing to that directory. Do not run
-Registry installation for this unpublished provider. `examples/provider` uses
+`registry.terraform.io/cmdennis/mxroute` pointing to that directory. Keep development
+testing on local binaries or mirrors. `examples/provider` uses
 runtime credential environment variables; `examples/aliases` demonstrates an
 ephemeral API-key input. Provider configuration validates inputs without API calls.
 
@@ -90,7 +91,8 @@ six unsigned development ZIPs outside Git with publication disabled. With the
 native ZIP in `MXROUTE_RELEASE_ARCHIVE`, `make release-smoke` checks normal mirror
 installation and schema validation; Linux additionally exercises the full
 mock lifecycle/import workflow using the production binary. The protected release
-workflow signs and verifies real versioned packages before creating a draft.
+workflow signs, verifies and smoke-tests real versioned packages before publishing
+them automatically when a reviewed version tag is pushed.
 The minimum Terraform version is 1.11.1 because
 1.11.0 fails the sensitive/ephemeral write-only password persistence test; see
 [the validation record](docs/design/phase1.md).
@@ -124,7 +126,7 @@ requires concrete approval under the plan, including any disposable-object clean
 Provider type: `mxroute`. Go module: `github.com/CMDennis/terraform-provider-mxroute`.
 Development uses local overrides or filesystem mirrors. The repository is now
 public with the required name. The intended release channel is the public
-Terraform Registry; a usable signed version has not yet been confirmed there.
+Terraform Registry; clean Registry installation has not yet been confirmed here.
 
 ## Secrets and account privacy
 
