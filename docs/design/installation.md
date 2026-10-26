@@ -1,9 +1,9 @@
 # Installation, first use and upgrades
 
-The recovery beta `0.1.0-beta.2` is being prepared. Registry installation below
-becomes available only after the owner completes [publishing](publishing.md).
-The earlier `0.1.0-beta.1` public release is immutable and has no platform assets;
-it cannot be installed. Its tag and release are retained unchanged.
+The recovery beta `0.1.0-beta.2` is published with all nine provider assets.
+Registry ingestion and clean installation still require verification under
+[publishing](publishing.md). The earlier `0.1.0-beta.1` publication had no platform
+assets and could not be installed; use `0.1.0-beta.2` or a later verified release.
 The provider address is `registry.terraform.io/cmdennis/mxroute`, protocol v6.
 Supported packages are Linux, macOS and Windows on amd64 and arm64. The tested
 Terraform minimum is 1.11.1; 1.11.0 fails write-only password persistence checks.

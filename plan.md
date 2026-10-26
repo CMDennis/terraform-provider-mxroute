@@ -88,8 +88,10 @@ and the empty isolated Terraform state are retained. Other mutations remain unve
 
 Phase 8 now provides six-platform packaging, signed-checksum verification,
 protocol-v6 manifest distribution, production-package mock installation/lifecycle
-tests, private-account commit/push/release checks, a manual protected draft workflow,
+tests, private-account commit/push/release checks, an automatic tag-driven release workflow,
 maintenance automation and comprehensive release/user/support documentation.
+[The October 26 release-process update](docs/design/phase8.md#release-process-update--october-26-2026)
+supersedes the original manual draft workflow and disables the weekly scan.
 [The Phase 8 record](docs/design/phase8.md) separates passing local evidence from
 pending publication gates; [publishing](docs/design/publishing.md) lists the exact
 manual GitHub, GPG and Registry steps. No repository visibility change, release,

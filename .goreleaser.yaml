@@ -33,11 +33,8 @@ signs:
       - --detach-sign
       - '${artifact}'
 release:
-  # The protected workflow creates a draft with gh only after verification.
+  # The tag workflow publishes with gh only after verification and mock smoke tests.
   disable: true
-  draft: true
-  prerelease: true
-  make_latest: false
   replace_existing_draft: false
   use_existing_draft: false
   replace_existing_artifacts: false

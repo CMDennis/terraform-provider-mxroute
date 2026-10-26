@@ -1,5 +1,9 @@
 # Phase 8 — Release preparation and maintenance
 
+The original preparation record below is historical. See the
+[October 26 release-process update](#release-process-update--october-26-2026) and
+[publishing guide](publishing.md) for the current tag-driven workflow.
+
 Date: October 19, 2026. Local release preparation is implemented and checked.
 **Public release and the Registry installation exit gate remain pending the
 owner's manual settings, signing identity and publication.** The proposed first
@@ -69,6 +73,9 @@ packaging/compilation, not native lifecycle coverage on every platform.
 
 ## Pending owner/publication gates
 
+This section records the original manual-release gates. The October 26 update
+below supersedes workflow dispatch, signing approval and manual draft publication.
+
 The original signed `v0.1.0-beta.1` draft contains all nine validated assets, but a
 separate published entry for that tag has no assets and is immutable. Recovery
 uses `v0.1.0-beta.2` from the same green provider commit; no published version or
@@ -91,3 +98,39 @@ No earlier public provider version exists, so no release-to-release upgrade is
 claimed. Future changes require migration/state-upgrade tests and preserved
 versioned artifacts. Live test scope and unverified behavior remain documented
 in [Phase 7](phase7.md); publication does not authorize new live account operations.
+
+## Release-process update — October 26, 2026
+
+At the owner's request, releases now follow the EASYDNS provider's tag-driven
+process. Pushing a reviewed `v*` version tag on `main` runs offline validation,
+vulnerability analysis and snapshot/mock smoke checks, then builds, signs,
+verifies and smoke-tests the real packages before publishing all nine assets
+automatically. Prerelease tags remain pre-releases; stable semantic-version tags
+produce stable releases. Generated notes link to the live-validation limits.
+Readiness decisions and all account-protection rules still apply.
+
+Go 1.26.9 failed the current vulnerability gate for GO-2026-6809. The release/local
+toolchain is now pinned to patched Go 1.26.10, with Go 1.27.3 in the newer CI lane.
+The existing `v0.1.0-beta.2` publication was also confirmed to contain nine assets;
+Registry ingestion and clean installation have not been reverified here.
+
+The `provider-release` environment retains its existing secret names and trusted
+fingerprint variable. Its deployment policy must allow `v*` tags rather than
+`main` branch executions, with no required-reviewer gate. No release dispatch,
+signing approval or manual draft-publication step remains. GoReleaser still cannot
+upload directly; only the final verified asset list is published. Existing tags,
+drafts, releases and assets are never overwritten.
+
+The weekly compatibility/API-drift schedule has been removed. The workflow remains
+available for manual execution; normal CI and Dependabot update PRs
+continue. [Publishing](publishing.md) documents the current process and setup.
+No new provider version or authenticated live test is part of this process change.
+
+Local verification for the process update: the complete offline `make check build`
+suite passed; the patched toolchain passed vulnerability analysis, six-platform
+snapshot packaging/checksum verification and native macOS installation/schema
+smoke testing. The workflow passed Actionlint and isolated command checks for
+stable/beta/RC publication flags, the nine-asset list and rejected unmerged or
+invalid tag refs. Private source/history/archive checks passed. Full packaged
+lifecycle coverage remains a Linux CI check; real signing/publication will run
+only when a new version tag is pushed.

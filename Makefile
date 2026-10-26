@@ -1,4 +1,4 @@
-GOTOOLCHAIN ?= go1.26.9
+GOTOOLCHAIN ?= go1.26.10
 export GOTOOLCHAIN
 BUILD_DIR ?= /tmp/mxroute-provider-build
 DOCS_VERSION := v0.25.0
@@ -44,7 +44,7 @@ privacy:
 
 check: fmt-check lint test inventory docs-check privacy
 
-# Snapshot mode never uploads; only the protected manual workflow can upload drafts.
+# Snapshot mode never uploads; the tag workflow publishes verified release assets.
 snapshot:
 	go run github.com/goreleaser/goreleaser/v2@v2.17.0 release --snapshot --clean --skip=sign
 	cp terraform-registry-manifest.json $(RELEASE_DIR)/terraform-provider-mxroute_$(RELEASE_VERSION)_manifest.json

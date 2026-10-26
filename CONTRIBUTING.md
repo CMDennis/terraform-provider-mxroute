@@ -1,7 +1,7 @@
 # Contributing
 
-Use Go 1.26.9, Python 3.10+, Terraform 1.11.1+ and GPG for signature checks.
-The CI matrix also tests Go 1.27.1 and Terraform 1.16.6 on Linux and macOS.
+Use Go 1.26.10, Python 3.10+, Terraform 1.11.1+ and GPG for signature checks.
+The CI matrix also tests Go 1.27.3 and Terraform 1.16.6 on Linux and macOS.
 Install the pinned Python dependency from `requirements-dev.txt` in a virtual
 environment. Tests use only synthetic accounts, runtime-generated secrets and
 loopback services. Never supply actual credentials to ordinary tests or CI.
@@ -55,6 +55,8 @@ and index, rerun the check, and follow SECURITY.md if anything entered history.
 Live tests require concrete approval under [plan.md](plan.md); possession of an
 API key is insufficient. Never point acceptance tests at a real account.
 Follow [publishing](docs/design/publishing.md) for repository settings, key
-management, required checks, draft review and Registry publication. No PR job
+management, required checks, tag-driven releases and Registry publication. Pushing
+a reviewed `v*` tag on `main` automatically publishes after validation; versions
+with a prerelease suffix remain pre-releases. No PR job
 receives release signing secrets. All published assets and tags are immutable
 by project policy; corrections receive a new version.

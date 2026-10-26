@@ -44,7 +44,7 @@ rewrite the upstream snapshot to match a runtime deviation.
 4. Deliberately update `baseline.json` and its checksum sidecar after review, then
    regenerate the two inventory outputs. Run the README's offline checks.
 5. Retain prior sanitized snapshots and original digests for provenance. The
-   scheduled drift check compares public bytes against `upstream_sha256`, not the
+   manually triggered drift check compares public bytes against `upstream_sha256`, not the
    sanitized file digest. Re-run approved live verification only
    in Phase 7 under the account-protection policy; mock results remain separate.
 
